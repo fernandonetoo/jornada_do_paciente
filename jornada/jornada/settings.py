@@ -43,14 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'user',
-    'unidades',
-    'core',
+    'app',
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
-
+    'drf_spectacular_sidecar',
 ]
 
 REST_FRAMEWORK = {
@@ -73,7 +71,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
 }
