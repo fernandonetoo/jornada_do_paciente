@@ -61,7 +61,7 @@ class UnidadeBasicaDeSaude(BaseModel):
         return f"{self.nome} — {self.cidade}/{self.estado}"
 
 # Modelo para representar os CRMs dos médicos, garantindo que cada CRM seja único no sistema
-class CRM(models.Model):
+class CRM(BaseModel):
     numero = models.CharField(max_length=20, unique=True)
 
     class Meta:
@@ -74,8 +74,8 @@ class CRM(models.Model):
 # Modelo para representar os médicos cadastrados no sistema, associando um usuário do Django, uma UBS (se for médico da UBS), um CRM e o tipo de médico (médico da UBS ou oncologista do PCC)
 class Medico(BaseModel):
     class Tipo(models.TextChoices):
-        UBS         = "UBS",         "Médico da UBS"
-        ONCOLOGISTA = "ONCOLOGISTA", "Oncologista do Programa Paraíba Contra o Câncer"
+        UBS         = "UBS", "Médico da UBS"
+        ONCOLOGISTA = "ONCOLOGISTA", "Oncologista do Paraíba Contra o Câncer"
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
@@ -84,7 +84,7 @@ class Medico(BaseModel):
         choices=Tipo.choices,
         default=Tipo.UBS,
     )
-    
+
     ubs = models.ForeignKey(
         UnidadeBasicaDeSaude,
         on_delete=models.PROTECT,
@@ -111,8 +111,10 @@ class Medico(BaseModel):
             if not self.ubs:
                 raise ValidationError({"ubs": "Médico da UBS deve estar vinculado a uma Unidade Básica de Saúde."})
 
+    # Ajustei o save para não haver conflito com o signals.py, onde o médico é criado e depois o grupo é adicionado. O save do médico não precisa criar o usuário e o CRM, pois isso já é feito no serializer. O save do médico agora apenas chama full_clean para garantir que as validações sejam executadas, e depois salva normalmente. O signals.py continua responsável por adicionar o grupo ao usuário quando um médico é criado, e por sincronizar a inativação do médico com o usuário e o CRM. Dessa forma, evitamos conflitos entre o save do modelo e os signals, garantindo que as regras de negócio sejam respeitadas sem criar dependências circulares.
     def save(self, *args, **kwargs):
-        self.full_clean()
+        if not kwargs.get('update_fields'):
+            self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):

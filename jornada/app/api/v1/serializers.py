@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
+from django.db import transaction
 from app.models import (
     UnidadeBasicaDeSaude,
     CRM,
@@ -19,8 +20,7 @@ class UnidadeSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnidadeBasicaDeSaude
         fields = [
-            'id', 'nome', 'cnes', 'cidade', 'estado', 'endereco',
-            'created_at', 'updated_at', 'is_deleted'
+            'id', 'nome', 'cnes', 'cidade', 'estado', 'endereco'
         ]
 
 
@@ -43,30 +43,114 @@ class CRMSerializer(serializers.ModelSerializer):
 
 
 class MedicoSerializer(serializers.ModelSerializer):
+
+    # Campos de saída (GET)
     tipo_display = serializers.CharField(source='get_tipo_display', read_only=True)
-    
+    user_nome    = serializers.CharField(source='user.get_full_name', read_only=True)
+    ubs_nome     = serializers.CharField(source='ubs.nome', read_only=True)
+    crm_numero   = serializers.CharField(source='crm.numero', read_only=True)
+
+    # Campos de entrada (POST)
+    username     = serializers.CharField(write_only=True)
+    first_name   = serializers.CharField(write_only=True)
+    last_name    = serializers.CharField(write_only=True)
+    email        = serializers.EmailField(write_only=True)
+    password     = serializers.CharField(write_only=True)
+    numero_crm   = serializers.CharField(write_only=True)
+
     class Meta:
-        model = Medico
+        model  = Medico
         fields = [
             'id',
-            'user',
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'password',
+            'user_nome',
             'tipo',
             'tipo_display',
             'ubs',
-            'crm',
-            'created_at',
-            'updated_at',
-            'is_deleted'
+            'ubs_nome',
+            'numero_crm',
+            'crm_numero',
         ]
-        read_only_fields = ['user']
+
+    # ──────────────────────────────────────────
+    # Validações ded username, email e número do CRM e tipo do médico.
+    # ──────────────────────────────────────────
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                f"O username '{value}' já está em uso."
+            )
+        return value
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                f"O email '{value}' já está em uso."
+            )
+        return value
+
+    def validate_numero_crm(self, value):
+        if CRM.objects.filter(numero=value).exists():
+            raise serializers.ValidationError(
+                f"O CRM {value} já está cadastrado no sistema."
+            )
+        return value
+
+    def validate(self, data):
+        tipo = data.get('tipo')
+        ubs  = data.get('ubs')
+
+        if tipo == Medico.Tipo.UBS and not ubs:
+            raise serializers.ValidationError(
+                {"ubs": "Médico do tipo UBS deve estar vinculado a uma UBS."}
+            )
+        if tipo == Medico.Tipo.ONCOLOGISTA and ubs:
+            raise serializers.ValidationError(
+                {"ubs": "Oncologista não deve ser vinculado a uma UBS."}
+            )
+        return data
+
+    # ──────────────────────────────────────────
+    # Métodos privados para criar usuário e CRM associados ao médico.
+    # ──────────────────────────────────────────
+
+    def _criar_usuario(self, validated_data):
+        return User.objects.create_user(
+            username   = validated_data.pop('username'),
+            first_name = validated_data.pop('first_name'),
+            last_name  = validated_data.pop('last_name'),
+            email      = validated_data.pop('email'),
+            password   = validated_data.pop('password'),
+        )
+
+    def _criar_crm(self, validated_data):
+        numero = validated_data.pop('numero_crm')
+        return CRM.objects.create(numero=numero)
+
+
+    # ──────────────────────────────────────────
+    # Create para criar o medico e crm.
+    # ──────────────────────────────────────────
+    
+    def create(self, validated_data):
+        with transaction.atomic():  # Garante que a operação seja um "tudo ou nada"
+            user = self._criar_usuario(validated_data)
+            crm = self._criar_crm(validated_data)
+            medico = Medico.objects.create(user=user, crm=crm, **validated_data)
+            return medico
+
 
 
 class HospitalSerializer(serializers.ModelSerializer):
     class Meta:
         model = HospitalTratamento
         fields = [
-            'id', 'nome', 'cnes', 'cidade', 'estado', 'endereco',
-            'created_at', 'updated_at', 'is_deleted'
+            'id', 'nome', 'cnes', 'cidade', 'estado', 'endereco'
         ]
 
 
@@ -85,10 +169,7 @@ class PacienteSerializer(serializers.ModelSerializer):
             'telefone',
             'endereco',
             'sexo',
-            'raca_cor',
-            'created_at',
-            'updated_at',
-            'is_deleted'
+            'raca_cor'
         ]
 
 

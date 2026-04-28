@@ -2,6 +2,7 @@ from rest_framework.routers import DefaultRouter
 from .viewsets import (
     UnidadeViewSet,
     UserViewSet,
+    CRMViewSet,
     MedicoViewSet,
     HospitalViewSet,
     PacienteViewSet,
@@ -16,7 +17,8 @@ from .viewsets import (
 
 router = DefaultRouter()
 router.register(r'unidades', UnidadeViewSet)
-router.register(r'users', UserViewSet)
+router.register(r'users', UserViewSet),
+router.register(r'crm', CRMViewSet),
 router.register(r'medicos', MedicoViewSet)
 router.register(r'hospitais', HospitalViewSet)
 router.register(r'pacientes', PacienteViewSet)
