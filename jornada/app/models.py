@@ -14,7 +14,6 @@ class SoftDeleteManager(models.Manager):
     def apenas_deletados(self):
         return super().get_queryset().filter(is_deleted=True)
 
-
 class BaseModel(models.Model):
     created_at  = models.DateTimeField(auto_now_add=True)
     updated_at  = models.DateTimeField(auto_now=True)
@@ -39,7 +38,7 @@ class BaseModel(models.Model):
     def hard_delete(self):
         super().delete()
 
-# Modelo para representar as unidades básicas de saúde (UBS)
+
 class UnidadeBasicaDeSaude(BaseModel):  
     class Estado(models.TextChoices):
         PARAIBA = "PB", "Paraíba"
@@ -60,9 +59,10 @@ class UnidadeBasicaDeSaude(BaseModel):
     def __str__(self):
         return f"{self.nome} — {self.cidade}/{self.estado}"
 
-# Modelo para representar os CRMs dos médicos, garantindo que cada CRM seja único no sistema
+
 class CRM(BaseModel):
     numero = models.CharField(max_length=20, unique=True)
+
 
     class Meta:
         verbose_name        = "CRM"
@@ -71,18 +71,18 @@ class CRM(BaseModel):
     def __str__(self):
         return self.numero
 
-# Modelo para representar os médicos cadastrados no sistema, associando um usuário do Django, uma UBS (se for médico da UBS), um CRM e o tipo de médico (médico da UBS ou oncologista do PCC)
+
 class Medico(BaseModel):
     class Tipo(models.TextChoices):
-        UBS         = "UBS", "Médico da UBS"
-        ONCOLOGISTA = "ONCOLOGISTA", "Oncologista do Paraíba Contra o Câncer"
+        ubs         = "ubs", "Médico da UBS"
+        oncologista = "oncologista", "Oncologista do Paraíba Contra o Câncer"
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     
     tipo = models.CharField(
         max_length=12,                    
         choices=Tipo.choices,
-        default=Tipo.UBS,
+        default=Tipo.ubs,
     )
 
     ubs = models.ForeignKey(
@@ -107,9 +107,10 @@ class Medico(BaseModel):
     def clean(self):
         from django.core.exceptions import ValidationError
         
-        if self.tipo == self.Tipo.UBS:
+        if self.tipo == self.Tipo.ubs:
             if not self.ubs:
                 raise ValidationError({"ubs": "Médico da UBS deve estar vinculado a uma Unidade Básica de Saúde."})
+
 
     # Ajustei o save para não haver conflito com o signals.py, onde o médico é criado e depois o grupo é adicionado. O save do médico não precisa criar o usuário e o CRM, pois isso já é feito no serializer. O save do médico agora apenas chama full_clean para garantir que as validações sejam executadas, e depois salva normalmente. O signals.py continua responsável por adicionar o grupo ao usuário quando um médico é criado, e por sincronizar a inativação do médico com o usuário e o CRM. Dessa forma, evitamos conflitos entre o save do modelo e os signals, garantindo que as regras de negócio sejam respeitadas sem criar dependências circulares.
     def save(self, *args, **kwargs):
@@ -119,12 +120,12 @@ class Medico(BaseModel):
 
     def __str__(self):
         nome = self.user.get_full_name() or self.user.username
-        if self.tipo == self.Tipo.UBS:
+        if self.tipo == self.Tipo.ubs:
             return f"Dr(a). {nome} — UBS {self.ubs} — CRM {self.crm.numero}"
         else:
-            return f"Dr(a). {nome} — Oncologista do Paraíba Contra o Câncer — CRM {self.crm.numero}"
+            return f"Dr(a). {nome} — oncologista — CRM {self.crm.numero}"
     
-# Modelo para representar os hospitais de tratamento associados ao Programa Paraíba Contra o Câncer (PCC)
+
 class HospitalTratamento(BaseModel):
     class Estado(models.TextChoices):
         PARAIBA = "PB", "Paraíba"
@@ -146,7 +147,7 @@ class HospitalTratamento(BaseModel):
     def __str__(self):
         return f"{self.nome} — {self.cidade}"
     
-# Modelo para representar os pacientes cadastrados no sistema, associados a uma UBS e a um usuário do Django
+
 class Paciente(BaseModel):
     class Sexo(models.TextChoices):
         MASCULINO = "M", "Masculino"
@@ -189,7 +190,7 @@ class Paciente(BaseModel):
     def __str__(self):
         return self.nome
 
-# Modelo para representar os atendimentos realizados, associando um paciente, um médico e uma UBS, além de registrar a data do atendimento e uma observação clínica.
+
 class Atendimento(BaseModel):
     paciente           = models.ForeignKey(
         Paciente,
@@ -228,7 +229,7 @@ class Atendimento(BaseModel):
     def __str__(self):
         return f"Atendimento de {self.paciente} em {self.data_atendimento:%d/%m/%Y}"
 
-# Modelo para representar as teleconsultas realizadas, associando um atendimento, registrando o link da teleconsulta, o status (agendada, realizada ou cancelada), a data agendada e a data realizada (se aplicável).
+
 class Teleconsulta(BaseModel):
     class Status(models.TextChoices):
         AGENDADA   = "agendada",   "Agendada"
@@ -257,7 +258,7 @@ class Teleconsulta(BaseModel):
     def __str__(self):
         return f"Teleconsulta — {self.atendimento.paciente} ({self.status})"
 
-# Modelo para representar os retornos de teleconsulta, associando uma teleconsulta, registrando o link do retorno, o status (agendado, realizado ou cancelado), a data agendada e a data realizada (se aplicável).
+
 class RetornoTeleconsulta(BaseModel):
     class Status(models.TextChoices):
         AGENDADO   = "agendado",   "Agendado"
@@ -286,7 +287,7 @@ class RetornoTeleconsulta(BaseModel):
     def __str__(self):
         return f"Retorno — {self.teleconsulta.atendimento.paciente} ({self.status})"
 
-# Modelo para representar as solicitações de exame, associando uma teleconsulta ou um retorno de teleconsulta, registrando a descrição da solicitação e a data em que foi realizada.
+
 class SolicitacaoExame(BaseModel):
     teleconsulta     = models.OneToOneField(
         Teleconsulta,
@@ -325,7 +326,8 @@ class SolicitacaoExame(BaseModel):
         origem = self.teleconsulta or self.retorno
         return f"Solicitação de exame — {origem}"
 
-# Modelo para representar os resultados de exame, associando uma solicitação de exame, registrando o resultado e a data em que o resultado foi registrado.
+
+
 class ResultadoExame(BaseModel):
     solicitacao    = models.OneToOneField(
         SolicitacaoExame,
@@ -342,7 +344,7 @@ class ResultadoExame(BaseModel):
     def __str__(self):
         return f"Resultado — {self.solicitacao}"
     
-# Modelo para representar os diagnósticos realizados, associando um retorno de teleconsulta, um médico do PCC e um hospital de tratamento (se aplicável), registrando a descrição do diagnóstico, o status (positivo ou negativo), o tipo de câncer (se positivo) e a data do diagnóstico.
+ 
 class Diagnostico(BaseModel):
     retorno = models.OneToOneField(
         RetornoTeleconsulta,
@@ -355,7 +357,7 @@ class Diagnostico(BaseModel):
         Medico,
         on_delete=models.PROTECT,
         related_name="diagnosticos",
-        limit_choices_to={'tipo': Medico.Tipo.ONCOLOGISTA},
+        limit_choices_to={'tipo': Medico.Tipo.oncologista},
     )
     
     hospital = models.ForeignKey(
@@ -366,7 +368,7 @@ class Diagnostico(BaseModel):
         related_name="diagnosticos",
     )
     
-    # === CAMPO ALTERADO: agora com Sim/Não ===
+
     class Positivo(models.TextChoices):
         SIM = "S", "Sim"
         NAO = "N", "Não"

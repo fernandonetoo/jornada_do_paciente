@@ -1,0 +1,68 @@
+# Ambiente Virtual
+venv/
+env/
+ENV/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+*.pot
+
+# Dependências Python
+pip-log.txt
+pip-delete-this-directory.txt
+.Python
+*.py[cod]
+*$py.class
+__pycache__/
+*.so
+.Python
+env/
+venv/
+
+# IDE e Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.env
+.env.local
+.env.*.local
+*.sublime-project
+*.sublime-workspace
+
+# Sistema operacional
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Testes
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Variáveis de ambiente
+.env
+.env.*.local
+
+# IDE específicas
+*.iml
+*.iws
+*.ipr
+
+# Temporários
+*.tmp
+*.bak
+*.swp
