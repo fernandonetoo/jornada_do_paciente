@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { User, Search, Plus, X, CheckCircle, ChevronRight, Users } from "lucide-react";
 import BotaoVoltar from "@/components/BotaoVoltar";
+import { saveCollection } from "../services/backend";
 
 export default function Atendimentos() {
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ export default function Atendimentos() {
     return Object.keys(novosErros).length === 0;
   }
 
-  function salvarPaciente() {
+  async function salvarPaciente() {
     if (!validar()) return;
 
     if (pacientes.find((p) => p.cpf === cpf)) {
@@ -70,12 +71,16 @@ export default function Atendimentos() {
     };
 
     const atualizados = [novo, ...pacientes];
-    setPacientes(atualizados);
-    localStorage.setItem("pacientes", JSON.stringify(atualizados));
-    localStorage.setItem("pacienteAtual", JSON.stringify(novo));
+    try {
+      await saveCollection("pacientes", atualizados);
+      setPacientes(atualizados);
+      localStorage.setItem("pacienteAtual", JSON.stringify(novo));
 
-    fecharModal();
-    setMostrarSucesso(true);
+      fecharModal();
+      setMostrarSucesso(true);
+    } catch {
+      alert("Não foi possível salvar o atendimento no backend.");
+    }
   }
 
   function formatarData(iso: string) {

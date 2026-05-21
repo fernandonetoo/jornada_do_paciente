@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import (
     CRM,
+    FrontendRecord,
     UnidadeBasicaDeSaude,
     Medico,
     HospitalTratamento,
@@ -11,6 +12,7 @@ from .models import (
     SolicitacaoExame,
     ResultadoExame,
     Diagnostico,
+    UserProfile,
 )
 
 
@@ -25,6 +27,20 @@ class UnidadeBasicaDeSaudeAdmin(admin.ModelAdmin):
 class CRMAdmin(admin.ModelAdmin):
     list_display = ['numero']
     search_fields = ['numero']
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ['nome', 'cpf', 'user', 'grupos']
+    search_fields = ['nome', 'cpf', 'user__email', 'user__username']
+    list_filter = ['grupos']
+
+
+@admin.register(FrontendRecord)
+class FrontendRecordAdmin(admin.ModelAdmin):
+    list_display = ['kind', 'patient_cpf', 'created_by', 'updated_at', 'is_deleted']
+    search_fields = ['kind', 'patient_cpf']
+    list_filter = ['kind', 'is_deleted']
     
 
 @admin.register(Medico)

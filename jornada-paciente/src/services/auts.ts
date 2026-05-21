@@ -14,6 +14,7 @@ export function login(data: LoginResponse) {
 
   if (data.token) {
     localStorage.setItem("token", data.token);
+    localStorage.setItem("access", data.token);
   }
 }
 
@@ -24,4 +25,6 @@ export function getUsuario(): Usuario | null {
 export function logout() {
   localStorage.removeItem("usuarioLogado");
   localStorage.removeItem("token");
+  localStorage.removeItem("access");
+  localStorage.removeItem("refresh");
 }

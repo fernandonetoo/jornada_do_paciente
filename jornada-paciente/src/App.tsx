@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { clearSession, refreshBootstrap } from "./services/backend";
 
 // Páginas públicas
 import Criar from "./pages/Criar";
@@ -40,46 +41,10 @@ import CriarDiagnostico from "./pages/CriarDiagnostico";
 
 export default function App() {
 
-  // 🔥 Inicializa usuários (APENAS se não existir)
   useEffect(() => {
-    const usuariosExistentes = localStorage.getItem("usuarios");
-
-    if (!usuariosExistentes) {
-      const usuariosIniciais = [
-        {
-          email: "medico@ubs.com",
-          senha: "123456",
-          nome: "Dr. João",
-          grupos: ["medico_ubs"]
-        },
-        {
-          email: "paciente@teste.com",
-          senha: "123456",
-          nome: "Paciente Teste",
-          grupos: ["paciente"]
-        },
-        {
-          email: "admin@admin.com",
-          senha: "123456",
-          nome: "Administrador",
-          grupos: ["admin"]
-        },
-        {
-          email: "oncologista@teste.com",
-          senha: "123456",
-          nome: "Dr. Carlos",
-          grupos: ["medico_oncologista"]
-},      
-        {
-          email: "oncologista22@teste.com",
-          senha: "123456",
-          nome: "Dra. Jessica",
-          grupos: ["medico_oncologista"]
-}
-        
-      ];
-      localStorage.setItem("usuarios", JSON.stringify(usuariosIniciais));
-    }
+    refreshBootstrap().catch(() => {
+      clearSession();
+    });
   }, []);
 
   return (
@@ -239,5 +204,3 @@ export default function App() {
     </Routes>
   );
 }
-
-

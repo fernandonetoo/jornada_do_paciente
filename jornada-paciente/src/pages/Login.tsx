@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import bgLogin from "../styles/img/background-login.png";
 import logo from "../assets/logo2.png";
+import { loginBackend } from "../services/backend";
 
 export default function Login() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -17,40 +18,23 @@ export default function Login() {
     setErro("");
     setLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    try {
+      const usuario = await loginBackend(email.trim(), senha);
 
-    const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
-    const entrada = email.trim().toLowerCase();
-    const usuario = usuarios.find(
-      (u: any) =>
-        u.email?.toLowerCase() === entrada || u.cpf === entrada
-    );
+      if (usuario.grupos?.includes("medico_ubs")) { navigate("/homemedico"); return; }
+      if (usuario.grupos?.includes("medico_oncologista")) { navigate("/pacientes"); return; }
+      if (usuario.grupos?.includes("paciente")) { navigate("/dashboard"); return; }
+      if (usuario.grupos?.includes("admin")) { navigate("/admin"); return; }
 
-    if (!usuario) {
-      setErro("Usuário não encontrado. Verifique seu e-mail ou CPF.");
+      setErro("Grupo de usuário não reconhecido.");
+    } catch (error: any) {
+      setErro(
+        error?.response?.data?.message ||
+          "Não foi possível fazer login. Verifique seu e-mail/CPF e senha."
+      );
+    } finally {
       setLoading(false);
-      return;
     }
-
-    if (usuario.senha !== senha) {
-      setErro("Senha incorreta. Tente novamente.");
-      setLoading(false);
-      return;
-    }
-
-    const fotoUsuario = localStorage.getItem(`fotoPerfil_${usuario.email}`);
-    const usuarioCompleto = { ...usuario, fotoPerfil: fotoUsuario || null };
-
-    localStorage.setItem("usuarioLogado", JSON.stringify(usuarioCompleto));
-    localStorage.setItem("fotoPerfilAtual", fotoUsuario || "");
-
-    if (usuario.grupos?.includes("medico_ubs")) { navigate("/homemedico"); return; }
-    if (usuario.grupos?.includes("medico_oncologista")) { navigate("/pacientes"); return; }
-    if (usuario.grupos?.includes("paciente")) { navigate("/dashboard"); return; }
-    if (usuario.grupos?.includes("admin")) { navigate("/admin"); return; }
-
-    setErro("Grupo de usuário não reconhecido.");
-    setLoading(false);
   }
 
   return (

@@ -1,10 +1,10 @@
 import { useState, useRef, useContext, useEffect } from "react";
 import Header from "../components/Header1";
-import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import BotaoVoltar from "../components/BotaoVoltar";
 import "./Perfil1.css";
+import { clearSession, updateProfile } from "../services/backend";
 
 export default function Perfil() {
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ export default function Perfil() {
 
     const reader = new FileReader();
 
-    reader.onloadend = () => {
+    reader.onloadend = async () => {
       const base64 = reader.result as string;
 
       const atualizado = {
@@ -87,12 +87,18 @@ export default function Perfil() {
       atualizarUsuarios(atualizado);
 
       setFoto(base64);
+
+      try {
+        await updateProfile(atualizado);
+      } catch {
+        alert("Não foi possível salvar a foto no backend.");
+      }
     };
 
     reader.readAsDataURL(file);
   }
 
-  function removerFoto() {
+  async function removerFoto() {
     const atualizado = {
       ...usuario,
       foto: null,
@@ -107,9 +113,15 @@ export default function Perfil() {
 
     setFoto(null);
     setMenuAberto(false);
+
+    try {
+      await updateProfile(atualizado);
+    } catch {
+      alert("Não foi possível remover a foto no backend.");
+    }
   }
 
-  function salvar() {
+  async function salvar() {
     const atualizado = {
       ...usuario,
       nome,
@@ -128,10 +140,15 @@ export default function Perfil() {
 
     atualizarUsuarios(atualizado);
 
-    setEditando(false);
-    setToast(true);
+    try {
+      await updateProfile(atualizado);
+      setEditando(false);
+      setToast(true);
 
-    setTimeout(() => setToast(false), 2800);
+      setTimeout(() => setToast(false), 2800);
+    } catch {
+      alert("Não foi possível salvar o perfil no backend.");
+    }
   }
 
   function logout() {
@@ -141,7 +158,7 @@ export default function Perfil() {
 
     if (!confirmar) return;
 
-    localStorage.removeItem("usuarioLogado");
+    clearSession();
 
     navigate("/");
   }
@@ -368,4 +385,3 @@ function Campo({
     </div>
   );
 }
-

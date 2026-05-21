@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import bgLogin from "../styles/img/background-login.png";
 import logo from "../assets/logo2.png";
+import { registerPaciente } from "../services/backend";
 
 export default function CreateAccount() {
   const navigate = useNavigate();
@@ -45,32 +46,27 @@ export default function CreateAccount() {
     }
 
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
-    const existe = usuarios.find((u: any) => u.email === email.trim().toLowerCase());
-
-    if (existe) {
-      setErro("Já existe uma conta com este e-mail.");
+    try {
+      await registerPaciente({
+        nome,
+        cpf,
+        data,
+        email: email.trim().toLowerCase(),
+        senha,
+      });
+      navigate("/");
+    } catch (error: any) {
+      const errors = error?.response?.data?.errors;
+      setErro(
+        errors?.email?.[0] ||
+          errors?.cpf?.[0] ||
+          errors?.senha?.[0] ||
+          error?.response?.data?.message ||
+          "Não foi possível criar a conta."
+      );
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const novoUsuario = {
-      nome,
-      cpf,
-      data,
-      email: email.trim().toLowerCase(),
-      senha,
-      tipo: "paciente",
-      grupos: ["paciente"],
-    };
-
-    usuarios.push(novoUsuario);
-    localStorage.setItem("usuarios", JSON.stringify(usuarios));
-
-    setLoading(false);
-    navigate("/");
   }
 
   return (

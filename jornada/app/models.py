@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from jsonschema import ValidationError
 
 
 class SoftDeleteManager(models.Manager):
@@ -38,6 +38,63 @@ class BaseModel(models.Model):
 
     def hard_delete(self):
         super().delete()
+
+
+class UserProfile(BaseModel):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    nome = models.CharField(max_length=150)
+    cpf = models.CharField(max_length=14, unique=True, null=True, blank=True)
+    data_nascimento = models.DateField(null=True, blank=True)
+    telefone = models.CharField(max_length=20, blank=True)
+    cartao_sus = models.CharField(max_length=20, blank=True)
+    foto = models.TextField(blank=True)
+    grupos = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        verbose_name = "Perfil de Usuário"
+        verbose_name_plural = "Perfis de Usuários"
+        ordering = ["nome"]
+
+    def __str__(self):
+        return self.nome or self.user.email or self.user.username
+
+
+class FrontendRecord(BaseModel):
+    class Kind(models.TextChoices):
+        PACIENTES = "pacientes", "Pacientes"
+        CONSULTA = "consulta", "Consultas"
+        EXAMES = "exames", "Exames"
+        REGULACAO = "regulacao", "Regulação"
+        DIAGNOSTICOS = "diagnosticos", "Diagnósticos"
+
+    kind = models.CharField(max_length=20, choices=Kind.choices)
+    patient_cpf = models.CharField(max_length=14, blank=True, db_index=True)
+    payload = models.JSONField(default=dict)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="frontend_records_created",
+        null=True,
+        blank=True,
+    )
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="frontend_records_updated",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Registro do Frontend"
+        verbose_name_plural = "Registros do Frontend"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["kind", "patient_cpf"]),
+        ]
+
+    def __str__(self):
+        return f"{self.kind} - {self.patient_cpf or 'sem paciente'}"
 
 # Modelo para representar as unidades básicas de saúde (UBS)
 class UnidadeBasicaDeSaude(BaseModel):  

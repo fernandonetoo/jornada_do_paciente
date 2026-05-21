@@ -4,6 +4,7 @@ import { useState } from "react";
 import BotaoVoltar from "../components/BotaoVoltar";
 import "../pages/forms-medicos.css";
 import { User } from "lucide-react";
+import { saveCollection } from "../services/backend";
 
 export default function Exames() {
   const location = useLocation();
@@ -95,7 +96,7 @@ export default function Exames() {
     setEditandoIndex(null);
   }
 
-  function salvarExame() {
+  async function salvarExame() {
     if (!tipo || !data || !hora) {
       alert(
         "Preencha os campos obrigatórios!"
@@ -104,6 +105,10 @@ export default function Exames() {
     }
 
     const novo = {
+      id:
+        editandoIndex !== null
+          ? todos[editandoIndex]?.id || Date.now()
+          : Date.now(),
       tipo,
       dataSolicitacao: data,
       hora,
@@ -112,8 +117,10 @@ export default function Exames() {
       laboratorio,
       observacoes,
       pacienteId: paciente.cpf,
-      resultado: "",
-      observacaoResultado: "",
+      pacienteNome: paciente.nome,
+      resultado: editandoIndex !== null ? todos[editandoIndex]?.resultado || "" : "",
+      observacaoResultado:
+        editandoIndex !== null ? todos[editandoIndex]?.observacaoResultado || "" : "",
       medicoResponsavel:
         usuarioLogado?.nome ||
         "Não informado",
@@ -128,10 +135,12 @@ export default function Exames() {
       todos.push(novo);
     }
 
-    localStorage.setItem(
-      "exames",
-      JSON.stringify(todos)
-    );
+    try {
+      await saveCollection("exames", todos);
+    } catch {
+      alert("Não foi possível salvar o exame no backend.");
+      return;
+    }
 
     limparFormulario();
 
@@ -161,38 +170,51 @@ export default function Exames() {
       exame.observacoes || ""
     );
 
-    const indexReal = todos.findIndex(
-      (e) =>
-        e.tipo === exame.tipo &&
-        e.dataSolicitacao ===
-          exame.dataSolicitacao
-    );
+    const indexReal = exame.id
+      ? todos.findIndex((e) => e.id === exame.id)
+      : todos.findIndex(
+          (e) =>
+            e.tipo === exame.tipo &&
+            e.dataSolicitacao ===
+              exame.dataSolicitacao &&
+            e.pacienteId === exame.pacienteId
+        );
 
     setEditandoIndex(indexReal);
 
     setMostrarForm(true);
   }
 
-  function excluirExame(index: number) {
+  async function excluirExame(index: number) {
     const confirmar = confirm(
       "Deseja excluir este exame?"
     );
 
     if (!confirmar) return;
 
-    const atualizados = todos.filter(
-      (_, i) => i !== index
-    );
+    const exame = exames[index];
+    const atualizados = exame?.id
+      ? todos.filter((e: any) => e.id !== exame.id)
+      : todos.filter(
+          (e: any) =>
+            !(
+              e.tipo === exame.tipo &&
+              e.dataSolicitacao === exame.dataSolicitacao &&
+              e.pacienteId === exame.pacienteId
+            )
+        );
 
-    localStorage.setItem(
-      "exames",
-      JSON.stringify(atualizados)
-    );
+    try {
+      await saveCollection("exames", atualizados);
+    } catch {
+      alert("Não foi possível excluir o exame no backend.");
+      return;
+    }
 
     window.location.reload();
   }
 
-  function salvarResultado() {
+  async function salvarResultado() {
     if (
       !resultadoTexto ||
       !dataResultado ||
@@ -236,10 +258,12 @@ export default function Exames() {
       }
     );
 
-    localStorage.setItem(
-      "exames",
-      JSON.stringify(atualizados)
-    );
+    try {
+      await saveCollection("exames", atualizados);
+    } catch {
+      alert("Não foi possível salvar o resultado no backend.");
+      return;
+    }
 
     setMostrarResultado(false);
 

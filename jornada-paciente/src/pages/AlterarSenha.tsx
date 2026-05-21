@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
+import { changePassword } from "../services/backend";
 
 export default function AlterarSenha() {
   const navigate = useNavigate();
@@ -9,14 +10,12 @@ export default function AlterarSenha() {
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
 
-  function handleAlterarSenha() {
+  async function handleAlterarSenha() {
     let usuarioLogado = null;
-    let usuarios: any[] = [];
 
     // ✅ evita quebra do JSON
     try {
       usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "null");
-      usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
     } catch {
       alert("Erro ao carregar dados. Faça login novamente.");
       return;
@@ -38,31 +37,23 @@ export default function AlterarSenha() {
       return;
     }
 
-    if (usuarioLogado.senha !== senhaAtual) {
-      alert("Senha atual incorreta!");
-      return;
+    try {
+      await changePassword(senhaAtual, novaSenha);
+      alert("Senha alterada com sucesso!");
+
+      setSenhaAtual("");
+      setNovaSenha("");
+      setConfirmarSenha("");
+
+      if (usuarioLogado.grupos?.includes("medico_ubs")) {
+        navigate("/perfil1");
+        return;
+      }
+
+      navigate("/perfil");
+    } catch (error: any) {
+      alert(error?.response?.data?.message || "Não foi possível alterar a senha.");
     }
-
-    // 🔄 atualiza lista de usuários
-    const atualizados = usuarios.map((u: any) =>
-      u.email === usuarioLogado.email
-        ? { ...u, senha: novaSenha }
-        : u
-    );
-
-    localStorage.setItem("usuarios", JSON.stringify(atualizados));
-
-    // 🔄 atualiza usuário logado
-    const atualizado = { ...usuarioLogado, senha: novaSenha };
-    localStorage.setItem("usuarioLogado", JSON.stringify(atualizado));
-
-    alert("Senha alterada com sucesso!");
-
-    setSenhaAtual("");
-    setNovaSenha("");
-    setConfirmarSenha("");
-
-    navigate("/perfil"); // 👈 redireciona (melhor UX)
   }
 
   return (

@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import "../pages/forms-medicos.css";
 import { User } from "lucide-react";
+import { saveCollection } from "../services/backend";
 
 export default function Diagnostico() {
   const location = useLocation();
@@ -94,7 +95,7 @@ export default function Diagnostico() {
     setEditandoIndex(null);
   }
 
-  function salvarDiagnostico() {
+  async function salvarDiagnostico() {
     if (!titulo || !data) {
       alert(
         "Preencha os campos obrigatórios!"
@@ -103,6 +104,10 @@ export default function Diagnostico() {
     }
 
     const novo = {
+      id:
+        editandoIndex !== null
+          ? todos[editandoIndex]?.id || Date.now()
+          : Date.now(),
       titulo,
       descricao,
       data,
@@ -110,6 +115,7 @@ export default function Diagnostico() {
       medico,
       observacoes,
       pacienteId: paciente.cpf,
+      pacienteNome: paciente.nome,
     };
 
     if (editandoIndex !== null) {
@@ -121,10 +127,12 @@ export default function Diagnostico() {
       todos.push(novo);
     }
 
-    localStorage.setItem(
-      "diagnosticos",
-      JSON.stringify(todos)
-    );
+    try {
+      await saveCollection("diagnosticos", todos);
+    } catch {
+      alert("Não foi possível salvar o diagnóstico no backend.");
+      return;
+    }
 
     limparFormulario();
 
@@ -165,21 +173,23 @@ export default function Diagnostico() {
         ""
     );
 
-    const indexReal =
-      todos.findIndex(
-        (d) =>
-          d.titulo ===
-            diagnostico.titulo &&
-          d.data ===
-            diagnostico.data
-      );
+    const indexReal = diagnostico.id
+      ? todos.findIndex((d) => d.id === diagnostico.id)
+      : todos.findIndex(
+          (d) =>
+            d.titulo ===
+              diagnostico.titulo &&
+            d.data ===
+              diagnostico.data &&
+            d.pacienteId === diagnostico.pacienteId
+        );
 
     setEditandoIndex(indexReal);
 
     setMostrarModal(true);
   }
 
-  function excluirDiagnostico(
+  async function excluirDiagnostico(
     index: number
   ) {
     const confirmar = confirm(
@@ -191,23 +201,26 @@ export default function Diagnostico() {
     const diagnostico =
       diagnosticos[index];
 
-    const atualizados =
-      todos.filter(
-        (d) =>
-          !(
-            d.titulo ===
-              diagnostico.titulo &&
-            d.data ===
-              diagnostico.data
-          )
-      );
+    const atualizados = diagnostico?.id
+      ? todos.filter((d) => d.id !== diagnostico.id)
+      : todos.filter(
+          (d) =>
+            !(
+              d.titulo ===
+                diagnostico.titulo &&
+              d.data ===
+                diagnostico.data &&
+              d.pacienteId ===
+                diagnostico.pacienteId
+            )
+        );
 
-    localStorage.setItem(
-      "diagnosticos",
-      JSON.stringify(
-        atualizados
-      )
-    );
+    try {
+      await saveCollection("diagnosticos", atualizados);
+    } catch {
+      alert("Não foi possível excluir o diagnóstico no backend.");
+      return;
+    }
 
     window.location.reload();
   }

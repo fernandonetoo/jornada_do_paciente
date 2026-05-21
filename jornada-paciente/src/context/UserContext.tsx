@@ -22,8 +22,8 @@ export function UserProvider({
       localStorage.getItem("usuarioLogado") || "null"
     );
 
-    if (usuario?.foto) {
-      setFoto(usuario.foto);
+    if (usuario?.foto || usuario?.fotoPerfil) {
+      setFoto(usuario.foto || usuario.fotoPerfil);
     } else {
       setFoto(null);
     }

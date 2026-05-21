@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import BotaoVoltar from "../components/BotaoVoltar";
 import "../pages/forms-medicos.css";
+import { saveCollection } from "../services/backend";
 
 export default function Consultas() {
   const location = useLocation();
@@ -78,7 +79,7 @@ export default function Consultas() {
     setEditandoIndex(null);
   }
 
-  function salvarConsulta() {
+  async function salvarConsulta() {
     if (!tipo || !data || !dataRetorno) {
       alert(
         "Preencha os campos obrigatórios!"
@@ -87,6 +88,10 @@ export default function Consultas() {
     }
 
     const nova = {
+      id:
+        editandoIndex !== null
+          ? todas[editandoIndex]?.id || Date.now()
+          : Date.now(),
       tipo,
       dataSolicitacao: data,
       dataRetorno,
@@ -96,6 +101,7 @@ export default function Consultas() {
       observacoes,
       status,
       pacienteId: paciente.cpf,
+      nomePaciente: paciente.nome,
     };
 
     if (editandoIndex !== null) {
@@ -104,10 +110,12 @@ export default function Consultas() {
       todas.push(nova);
     }
 
-    localStorage.setItem(
-      "consulta",
-      JSON.stringify(todas)
-    );
+    try {
+      await saveCollection("consulta", todas);
+    } catch {
+      alert("Não foi possível salvar a consulta no backend.");
+      return;
+    }
 
     limparFormulario();
 
@@ -143,33 +151,46 @@ export default function Consultas() {
       consulta.status || "Agendado"
     );
 
-    const indexReal = todas.findIndex(
-      (c) =>
-        c.tipo === consulta.tipo &&
-        c.dataSolicitacao ===
-          consulta.dataSolicitacao
-    );
+    const indexReal = consulta.id
+      ? todas.findIndex((c) => c.id === consulta.id)
+      : todas.findIndex(
+          (c) =>
+            c.tipo === consulta.tipo &&
+            c.dataSolicitacao ===
+              consulta.dataSolicitacao &&
+            c.pacienteId === consulta.pacienteId
+        );
 
     setEditandoIndex(indexReal);
 
     setMostrarForm(true);
   }
 
-  function excluirConsulta(index: number) {
+  async function excluirConsulta(index: number) {
     const confirmar = confirm(
       "Deseja excluir essa consulta?"
     );
 
     if (!confirmar) return;
 
-    const atualizadas = todas.filter(
-      (_, i) => i !== index
-    );
+    const consulta = consultas[index];
+    const atualizadas = consulta?.id
+      ? todas.filter((c: any) => c.id !== consulta.id)
+      : todas.filter(
+          (c: any) =>
+            !(
+              c.tipo === consulta.tipo &&
+              c.dataSolicitacao === consulta.dataSolicitacao &&
+              c.pacienteId === consulta.pacienteId
+            )
+        );
 
-    localStorage.setItem(
-      "consulta",
-      JSON.stringify(atualizadas)
-    );
+    try {
+      await saveCollection("consulta", atualizadas);
+    } catch {
+      alert("Não foi possível excluir a consulta no backend.");
+      return;
+    }
 
     window.location.reload();
   }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import BotaoVoltar from "../components/BotaoVoltar";
 import "../pages/forms-medicos.css";
 import { User } from "lucide-react";
+import { saveCollection } from "../services/backend";
 
 export default function Regulacao() {
   const location = useLocation();
@@ -91,7 +92,7 @@ export default function Regulacao() {
     setEditandoIndex(null);
   }
 
-  function salvarRegulacao() {
+  async function salvarRegulacao() {
     if (
       !tipo ||
       !data ||
@@ -105,7 +106,10 @@ export default function Regulacao() {
     }
 
     const nova = {
-      id: Date.now(),
+      id:
+        editandoIndex !== null
+          ? todas[editandoIndex]?.id || Date.now()
+          : Date.now(),
 
       tipo,
 
@@ -143,10 +147,12 @@ export default function Regulacao() {
       todas.push(nova);
     }
 
-    localStorage.setItem(
-      "regulacao",
-      JSON.stringify(todas)
-    );
+    try {
+      await saveCollection("regulacao", todas);
+    } catch {
+      alert("Não foi possível salvar a regulação no backend.");
+      return;
+    }
 
     limparFormulario();
 
@@ -197,7 +203,7 @@ export default function Regulacao() {
     setMostrarForm(true);
   }
 
-  function excluirRegulacao(
+  async function excluirRegulacao(
     index: number
   ) {
     const confirmar = confirm(
@@ -215,10 +221,12 @@ export default function Regulacao() {
           r.id !== regulacao.id
       );
 
-    localStorage.setItem(
-      "regulacao",
-      JSON.stringify(atualizadas)
-    );
+    try {
+      await saveCollection("regulacao", atualizadas);
+    } catch {
+      alert("Não foi possível excluir a regulação no backend.");
+      return;
+    }
 
     window.location.reload();
   }

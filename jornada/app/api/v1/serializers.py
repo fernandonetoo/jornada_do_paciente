@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from app.models import (
+    FrontendRecord,
     UnidadeBasicaDeSaude,
     CRM,
     Medico,
@@ -12,6 +13,7 @@ from app.models import (
     SolicitacaoExame,
     ResultadoExame,
     Diagnostico,
+    UserProfile,
 )
 
 
@@ -34,6 +36,62 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
             'email': {'required': True}
         }
+
+    def create(self, validated_data):
+        password = validated_data.pop("password", None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop("password", None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source="user.email", read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "id",
+            "user",
+            "email",
+            "nome",
+            "cpf",
+            "data_nascimento",
+            "telefone",
+            "cartao_sus",
+            "foto",
+            "grupos",
+            "created_at",
+            "updated_at",
+            "is_deleted",
+        ]
+
+
+class FrontendRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FrontendRecord
+        fields = [
+            "id",
+            "kind",
+            "patient_cpf",
+            "payload",
+            "created_by",
+            "updated_by",
+            "created_at",
+            "updated_at",
+            "is_deleted",
+        ]
+        read_only_fields = ["created_by", "updated_by"]
 
 
 class CRMSerializer(serializers.ModelSerializer):
