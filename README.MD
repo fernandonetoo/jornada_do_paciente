@@ -1,128 +1,399 @@
-# 🏥 Jornada do Paciente
+# Jornada do Paciente
 
-Sistema web desenvolvido para gerenciar e otimizar a jornada de pacientes no programa **Paraíba Contra o Câncer**, promovendo integração entre profissionais de saúde, pacientes e gestão administrativa.
+Sistema web para gerenciamento da jornada de pacientes, com backend em Django REST Framework e frontend em React + Vite.
 
----
+## Tecnologias
 
-## 📌 Descrição
+- Backend: Python, Django, Django REST Framework e Simple JWT
+- Frontend: React, TypeScript, Vite e Axios
+- Banco de dados padrao: SQLite
+- Banco opcional: PostgreSQL via arquivo `.env`
 
-O **Jornada do Paciente** é uma plataforma digital voltada para resolver a fragmentação e a falta de visibilidade no acompanhamento de pacientes dentro da rede pública de saúde.
+## Enderecos locais
 
-Atualmente, muitos processos relacionados a consultas, exames e regulação são descentralizados, manuais ou pouco integrados, o que pode gerar atrasos, retrabalho e dificuldade no monitoramento da evolução do paciente.
+Depois que os dois servidores estiverem rodando:
 
-Este sistema propõe uma solução centralizada que permite o acompanhamento contínuo da jornada do paciente — desde o cadastro até a realização de exames e consultas — garantindo maior eficiência operacional, transparência das informações e suporte à tomada de decisão clínica.
+- Frontend: http://localhost:5173
+- Backend/API: http://127.0.0.1:8000/api/v1/
+- Documentacao da API: http://127.0.0.1:8000/api/docs/
+- Admin do Django: http://127.0.0.1:8000/admin/
 
----
+Para usar o sistema em desenvolvimento, deixe dois terminais abertos: um para o backend e outro para o frontend.
 
-## 🎯 Objetivo
+## Contas de teste
 
-- Centralizar informações da jornada do paciente
-- Melhorar o fluxo de atendimento na rede de saúde
-- Reduzir falhas e atrasos em processos clínicos
-- Facilitar o acompanhamento por profissionais de saúde
-- Oferecer mais autonomia e visibilidade ao paciente
+Todas as contas abaixo usam a senha:
 
----
+```text
+123456
+```
 
-## ⚙️ Funcionalidades
-
-- 👤 Cadastro e edição de usuários  
-- 📊 Dashboard da jornada do paciente  
-- 🩺 Gerenciamento de consultas  
-- 🧪 Gerenciamento de exames  
-- 🔄 Gestão de regulação  
-- 📍 Acompanhamento completo do fluxo do paciente  
-
----
-
-## 👥 Tipos de Usuários
-
-- **Administrador**
-  - Gerencia usuários e configurações do sistema
-  - Acompanha indicadores gerais
-
-- **Médico Navegador**
-  - Responsável por acompanhar a jornada do paciente
-  - Auxilia na organização de consultas, exames e encaminhamentos
-
-- **Paciente**
-  - Acompanha sua própria jornada
-  - Visualiza consultas, exames e status do atendimento
+| Perfil | E-mail |
+| --- | --- |
+| Medico UBS | `medico@ubs.com` |
+| Paciente | `paciente@teste.com` |
+| Administrador | `admin@admin.com` |
+| Oncologista | `oncologista@teste.com` |
+| Oncologista | `oncologista22@teste.com` |
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Rodar pela primeira vez no Windows
 
-- **Frontend:** React.js / Next.js  
-- **Backend:** Django + Django Rest Framework (DRF)  
-- **API:** RESTful com versionamento para escalabilidade  
-- **Banco de Dados:** PostgreSQL  
-- **Prototipação:** Figma (opcional)
+### 1. Instalar os pre-requisitos
 
----
+Instale:
 
-## 🧱 Arquitetura
+- Git
+- Python 3
+- Node.js
 
-O sistema segue uma arquitetura baseada em APIs REST, permitindo:
+Confirme se os comandos estao funcionando:
 
-- Separação clara entre frontend e backend  
-- Escalabilidade da aplicação  
-- Versionamento de APIs  
+```powershell
+git --version
+python --version
+node --version
+npm --version
+```
 
+### 2. Baixar o projeto
 
----
+Se ainda nao tiver o projeto na maquina:
 
-## 🚀 Como Rodar o Projeto
+```powershell
+git clone <url-do-repositorio>
+cd jornada_do_paciente
+```
 
-### 🔧 Pré-requisitos
+Se voce ja recebeu a pasta do projeto, apenas entre nela:
 
-- Python 3.x  
-- Node.js  
-- PostgreSQL  
-- Git  
+```powershell
+cd C:\caminho\para\jornada_do_paciente
+```
 
----
+### 3. Configurar e rodar o backend
 
-### 📥 Clone o repositório
+No primeiro terminal:
 
-## 🚀 Como rodar o projeto (Backend - Django + DRF)
-
-```bash
-# 1. Clone o repositório
-git clone https://github.com/seu-usuario/jornada-do-paciente.git
-cd jornada-do-paciente
-
-# 2. Crie o ambiente virtual
-python -m venv venv
-
-# 3. Ative o ambiente virtual
-# Windows
-venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
-
-# 4. Instale as dependências
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 pip install -r requirements.txt
-
-# 5. Execute as migrações
+cd back_end
 python manage.py migrate
-
-# 6. Inicie o servidor
 python manage.py runserver
 ```
-## ⚙️ Configuração do Banco de Dados (PostgreSQL)
 
-Antes de rodar o servidor, configure o banco no arquivo settings.py:
+Se o PowerShell bloquear a ativacao do ambiente virtual, rode:
 
-```Bash
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'jornada_db',
-        'USER': 'seu_usuario',
-        'PASSWORD': 'sua_senha',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
+
+Depois feche e abra o terminal novamente, entre na pasta do projeto e repita a ativacao:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+### 4. Configurar e rodar o frontend
+
+Abra um segundo terminal:
+
+```powershell
+cd C:\caminho\para\jornada_do_paciente\front_end
+npm install
+npm run dev
+```
+
+Acesse no navegador:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## Rodar pela primeira vez no Linux
+
+### 1. Instalar os pre-requisitos
+
+Instale:
+
+- Git
+- Python 3
+- `python3-venv`
+- Node.js
+- npm
+
+Em distribuicoes baseadas em Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install git python3 python3-venv python3-pip nodejs npm
+```
+
+Confirme se os comandos estao funcionando:
+
+```bash
+git --version
+python3 --version
+node --version
+npm --version
+```
+
+### 2. Baixar o projeto
+
+Se ainda nao tiver o projeto na maquina:
+
+```bash
+git clone <url-do-repositorio>
+cd jornada_do_paciente
+```
+
+Se voce ja recebeu a pasta do projeto, apenas entre nela:
+
+```bash
+cd /caminho/para/jornada_do_paciente
+```
+
+### 3. Configurar e rodar o backend
+
+No primeiro terminal:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+cd back_end
+python manage.py migrate
+python manage.py runserver
+```
+
+### 4. Configurar e rodar o frontend
+
+Abra um segundo terminal:
+
+```bash
+cd /caminho/para/jornada_do_paciente/front_end
+npm install
+npm run dev
+```
+
+Acesse no navegador:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## Rodar novamente no Windows
+
+Use estes passos quando o projeto ja estiver instalado na maquina.
+
+### Backend
+
+No primeiro terminal:
+
+```powershell
+cd C:\caminho\para\jornada_do_paciente
+.\.venv\Scripts\Activate.ps1
+cd back_end
+python manage.py migrate
+python manage.py runserver
+```
+
+### Frontend
+
+No segundo terminal:
+
+```powershell
+cd C:\caminho\para\jornada_do_paciente\front_end
+npm run dev
+```
+
+Se alguem alterou as dependencias do frontend, rode antes:
+
+```powershell
+npm install
+```
+
+---
+
+## Rodar novamente no Linux
+
+Use estes passos quando o projeto ja estiver instalado na maquina.
+
+### Backend
+
+No primeiro terminal:
+
+```bash
+cd /caminho/para/jornada_do_paciente
+source .venv/bin/activate
+cd back_end
+python manage.py migrate
+python manage.py runserver
+```
+
+### Frontend
+
+No segundo terminal:
+
+```bash
+cd /caminho/para/jornada_do_paciente/front_end
+npm run dev
+```
+
+Se alguem alterou as dependencias do frontend, rode antes:
+
+```bash
+npm install
+```
+
+---
+
+## Configuracao opcional com PostgreSQL
+
+O projeto usa SQLite por padrao, entao nao precisa instalar PostgreSQL para rodar localmente.
+
+Se quiser usar PostgreSQL, crie um arquivo `.env` dentro da pasta `back_end`:
+
+```env
+USE_POSTGRES=true
+DATABASE_NAME=jornada_do_paciente
+DATABASE_USER=postgres
+DATABASE_PASSWORD=sua_senha
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+```
+
+Depois instale o driver do PostgreSQL no ambiente virtual:
+
+```bash
+pip install psycopg2-binary
+```
+
+E rode as migracoes novamente dentro da pasta `back_end`:
+
+```bash
+python manage.py migrate
+```
+
+---
+
+## Variaveis opcionais
+
+### Backend
+
+O arquivo `back_end/.env` pode receber:
+
+```env
+SECRET_KEY=sua_chave_secreta
+DEBUG=true
+ALLOWED_HOSTS=localhost,127.0.0.1
+```
+
+### Frontend
+
+O frontend usa por padrao:
+
+```text
+http://127.0.0.1:8000/api/v1/
+```
+
+Se precisar apontar para outro backend, crie `front_end/.env`:
+
+```env
+VITE_API_URL=http://127.0.0.1:8000/api/v1/
+```
+
+Depois reinicie o servidor do frontend.
+
+---
+
+## Comandos uteis
+
+### Backend
+
+Rodar migracoes:
+
+```bash
+cd back_end
+python manage.py migrate
+```
+
+Criar usuario administrador:
+
+```bash
+cd back_end
+python manage.py createsuperuser
+```
+
+Rodar testes do Django:
+
+```bash
+cd back_end
+python manage.py test
+```
+
+### Frontend
+
+Rodar em desenvolvimento:
+
+```bash
+cd front_end
+npm run dev
+```
+
+Gerar build:
+
+```bash
+cd front_end
+npm run build
+```
+
+Rodar lint:
+
+```bash
+cd front_end
+npm run lint
+```
+
+---
+
+## Problemas comuns
+
+### A porta 8000 ja esta em uso
+
+Rode o backend em outra porta:
+
+```bash
+python manage.py runserver 8001
+```
+
+Se fizer isso, atualize o `VITE_API_URL` no frontend para:
+
+```env
+VITE_API_URL=http://127.0.0.1:8001/api/v1/
+```
+
+### A porta 5173 ja esta em uso
+
+O Vite pode oferecer outra porta automaticamente. Use a URL exibida no terminal.
+
+### O comando `python` nao funciona no Linux
+
+Use `python3` no lugar de `python`.
+
+### O frontend nao conecta no backend
+
+Confira se:
+
+- O backend esta rodando.
+- O frontend esta usando a URL correta da API.
+- A URL termina com `/api/v1/`.

@@ -1,0 +1,251 @@
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-card-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-card-input svg {
+  position: absolute;
+  left: 13px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.search-card-input .form-input {
+  padding-left: 40px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  color: #374151;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.status-badge--success {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.status-badge--info {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.status-badge--warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge--danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.modal-form-body {
+  margin-top: 18px;
+}
+
+.modal-detail-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 20px;
+  color: #374151;
+  font-size: 14px;
+}
+
+.modal-detail-list p {
+  color: #374151;
+}
+
+.modal-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.paciente-card-body {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.paciente-card-clickable {
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.paciente-card-clickable:hover {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.paciente-card-action {
+  color: var(--jp-primary);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.compact-action {
+  min-height: 30px;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.filters-card-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, 0.8fr) minmax(150px, 0.8fr) auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.filters-card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.56);
+}
+
+.confirm-modal {
+  width: min(420px, 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.3);
+  padding: 22px;
+  animation: scaleIn 0.18s ease both;
+}
+
+.confirm-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #e6f3f7;
+  color: var(--jp-primary);
+  margin-bottom: 16px;
+}
+
+.confirm-icon--danger {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.confirm-content h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.confirm-content p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.confirm-btn {
+  min-height: 40px;
+  border-radius: 12px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.confirm-btn--secondary {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+}
+
+.confirm-btn--secondary:hover {
+  background: #f8fafc;
+}
+
+.confirm-btn--primary {
+  border: 1px solid var(--jp-primary);
+  background: var(--jp-primary);
+  color: #ffffff;
+}
+
+.confirm-btn--primary:hover {
+  background: var(--jp-primary-hover);
+}
+
+.confirm-btn--danger {
+  border: 1px solid #dc2626;
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.confirm-btn--danger:hover {
+  background: #b91c1c;
+}
+
+@media (max-width: 760px) {
+  .page-header-actions {
+    display: block;
+  }
+
+  .filters-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-card-actions,
+  .filters-card-actions .btn-cancelar {
+    width: 100%;
+  }
+
+  .confirm-overlay {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .confirm-modal {
+    padding: 18px;
+  }
+
+  .confirm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .confirm-btn {
+    width: 100%;
+  }
+}
