@@ -7,6 +7,7 @@ import { saveCollection } from "../services/backend";
 import { useToast } from "../hooks/useToast";
 import { useConfirm } from "../components/shared/useConfirm";
 import StatusDateFilters from "../components/shared/StatusDateFilters";
+import SearchCard from "../components/shared/SearchCard";
 import { matchesDateRange, matchesStatus } from "../lib/filters";
 import { PacienteAtualBanner, NenhumPacienteSelecionado } from "../components/shared/PacienteAtualBanner";
 import { usePacienteAtual } from "../hooks/usePacienteAtual";
@@ -323,26 +324,12 @@ export default function Regulacao() {
         <PacienteAtualBanner paciente={paciente} />
 
         {/* BUSCA */}
-        <div className="form-card">
-
-          <div className="form-group">
-            <label className="form-label">
-              Buscar regulação
-            </label>
-
-            <input
-              className="form-input"
-              placeholder="Buscar por tipo..."
-              value={busca}
-              onChange={(e) =>
-                setBusca(
-                  e.target.value
-                )
-              }
-            />
-          </div>
-
-        </div>
+        <SearchCard
+          label="Buscar regulação"
+          placeholder="Buscar por tipo..."
+          value={busca}
+          onChange={setBusca}
+        />
 
         {/* BOTÃO */}
         <StatusDateFilters

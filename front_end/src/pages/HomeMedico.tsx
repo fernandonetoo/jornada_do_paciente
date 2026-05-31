@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ClipboardList, FlaskConical, Users, Video,
-  User, Calendar, Activity, ArrowRight, Search,
+  User, Calendar, Activity, ArrowRight, Search, ChevronRight,
 } from "lucide-react";
 import Header1 from "../components/Header1";
 import { Input }   from "@/components/ui/input";
@@ -13,6 +13,7 @@ import PacienteCard from "../components/shared/PacienteCard";
 interface Paciente {
   id: number; nome: string; cpf: string;
   idade: string; suspeita: string; criadoEm: string;
+  foto?: string; fotoPerfil?: string;
 }
 interface Retorno {
   nomePaciente: string; tipo: string; dataRetorno: string; unidade: string;
@@ -82,6 +83,18 @@ export default function HomeMedico() {
     try { return new Date(iso).toLocaleDateString("pt-BR"); } catch { return iso; }
   }
 
+  function getFoto(p: Paciente) {
+    if (p.foto || p.fotoPerfil) return p.foto || p.fotoPerfil || "";
+
+    const usuarios = readCollection<any>("usuarios");
+    const cpfLimpo = String(p.cpf || "").replace(/\D/g, "");
+    const usuarioPaciente = usuarios.find(
+      (u: any) => String(u.cpf || "").replace(/\D/g, "") === cpfLimpo
+    );
+
+    return usuarioPaciente?.foto || usuarioPaciente?.fotoPerfil || "";
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 font-sans">
       <Header1 />
@@ -92,7 +105,7 @@ export default function HomeMedico() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
             <p className="text-2xl font-bold text-slate-900 mb-1">
-              Olá, {usuario?.nome || "Médico"}! 👋
+              Olá, {usuario?.nome || "Médico"}! 
             </p>
             <p className="text-sm text-slate-500 capitalize">{hoje}</p>
           </div>
@@ -142,67 +155,81 @@ export default function HomeMedico() {
               <span className="flex-1 text-[15px] font-bold text-slate-900">Últimos Pacientes</span>
               <button
                 onClick={() => navigate("/pacientes")}
-                className="text-xs font-semibold text-blue-500 hover:text-blue-700 transition-colors"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-500 hover:text-blue-700 transition-colors"
               >
-                Ver todos →
+                Ver todos
+                <ChevronRight size={14} />
               </button>
             </div>
 
             {/* table */}
             <div className="overflow-x-auto">
               <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-50 hover:bg-slate-50">
+                <TableHeader className="[&_tr]:border-b-0">
+                  <TableRow className="border-b-0 bg-slate-50 hover:bg-slate-50">
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Paciente</TableHead>
                     <TableHead className="hidden md:table-cell text-[11px] font-bold text-slate-400 uppercase tracking-wide">CPF</TableHead>
                     <TableHead className="hidden md:table-cell text-[11px] font-bold text-slate-400 uppercase tracking-wide">Idade</TableHead>
                     <TableHead className="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Suspeita</TableHead>
                     <TableHead className="hidden lg:table-cell text-[11px] font-bold text-slate-400 uppercase tracking-wide">Cadastro</TableHead>
-                    <TableHead />
+                    <TableHead className="w-[132px] text-right pr-5" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {ultimos.length === 0 ? (
-                    <TableRow>
+                    <TableRow className="border-b-0">
                       <TableCell colSpan={6} className="text-center text-slate-400 text-sm py-12">
                         Nenhum paciente cadastrado ainda.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    ultimos.map((p, i) => (
+                    ultimos.map((p, i) => {
+                      const foto = getFoto(p);
+
+                      return (
                       <TableRow
                         key={p.id}
-                        className={`hover:bg-blue-50/50 transition-colors ${i % 2 === 1 ? "bg-slate-50/60" : "bg-white"}`}
+                        className={`border-b-0 hover:bg-blue-50/50 transition-colors ${i % 2 === 1 ? "bg-slate-50/60" : "bg-white"}`}
                       >
                         <TableCell className="py-3">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                              <User size={14} className="text-slate-400" />
-                            </div>
+                            {foto ? (
+                              <img
+                                src={foto}
+                                alt={p.nome}
+                                className="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-[38px] h-[38px] rounded-full bg-[#f3f4f6] border-2 border-[#e5e7eb] flex items-center justify-center shrink-0">
+                                <User size={20} className="text-[#9ca3af]" />
+                              </div>
+                            )}
                             <span className="font-semibold text-[13px] text-slate-900">{p.nome}</span>
                           </div>
                         </TableCell>
                         <TableCell className="hidden md:table-cell text-[13px] text-slate-500">{p.cpf}</TableCell>
                         <TableCell className="hidden md:table-cell text-[13px] text-slate-500">{p.idade} anos</TableCell>
-                        <TableCell>
+                        <TableCell className="text-right">
                           <span className="bg-blue-50 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-full">
                             {p.suspeita}
                           </span>
                         </TableCell>
                         <TableCell className="hidden lg:table-cell text-[13px] text-slate-400">{fmt(p.criadoEm)}</TableCell>
-                        <TableCell>
+                        <TableCell className="w-[132px] text-right pr-5">
                           <button
                             onClick={() => {
                               localStorage.setItem("pacienteAtual", JSON.stringify(p));
                               navigate("/gerenciar", { state: p });
                             }}
-                            className="text-xs font-medium text-slate-600 border border-slate-200 rounded-lg px-3 py-1.5 hover:bg-slate-50 transition-colors"
+                            className="btn-ver-detalhes"
                           >
                             Detalhes
+                            <ChevronRight size={14} />
                           </button>
                         </TableCell>
                       </TableRow>
-                    ))
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -269,7 +296,7 @@ export default function HomeMedico() {
               placeholder="Buscar por nome ou CPF..."
               value={busca}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBusca(e.target.value)}
-              className="h-11 bg-slate-50 border-slate-200 text-sm rounded-xl"
+              className="h-11 bg-slate-50 border-slate-200 text-sm rounded-xl focus-visible:border-slate-200 focus-visible:ring-0 focus-visible:ring-offset-0"
               style={{ paddingLeft: 42 }}
             />
           </div>
@@ -337,3 +364,4 @@ function readRetornos() {
       unidade: consulta.unidade || "",
     }));
 }
+

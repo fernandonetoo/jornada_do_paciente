@@ -90,12 +90,25 @@ export default function Header() {
 
         ) : (
 
-          <User
-            size={28}
-            color="#0b4f6c"
-            style={{ cursor: "pointer" }}
+          <button
+            type="button"
+            aria-label="Abrir perfil"
             onClick={() => navigate("/perfil")}
-          />
+            style={{
+              width: "38px",
+              height: "38px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "#f3f4f6",
+              border: "2px solid #e5e7eb",
+              cursor: "pointer",
+              padding: 0,
+            }}
+          >
+            <User size={20} color="#9ca3af" />
+          </button>
 
         )}
 

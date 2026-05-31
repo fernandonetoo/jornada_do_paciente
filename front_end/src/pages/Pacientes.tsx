@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import {
   User,
-  Search,
   Users,
-  ArrowRight,
+  ChevronRight,
   Activity,
   Calendar,
 } from "lucide-react";
 import BotaoVoltar from "@/components/BotaoVoltar";
+import "../pages/forms-medicos.css";
+import SearchCard from "../components/shared/SearchCard";
 
 export default function Pacientes() {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export default function Pacientes() {
           suspeita: r.tipo,
           medico: r.medicoNome,
           criadoEm: r.criadoEm || "",
-          foto: u?.foto || "",
+          foto: u?.foto || u?.fotoPerfil || r.foto || r.fotoPerfil || "",
         };
       });
   }, [isUbs, usuario?.email]);
@@ -69,9 +70,12 @@ export default function Pacientes() {
 
     const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
 
-    const u = usuarios.find((u: any) => u.cpf === cpf);
+    const cpfLimpo = String(cpf || "").replace(/\D/g, "");
+    const u = usuarios.find(
+      (u: any) => String(u.cpf || "").replace(/\D/g, "") === cpfLimpo
+    );
 
-    return u?.foto || "";
+    return u?.foto || u?.fotoPerfil || "";
   }
 
   function fmt(iso: string) {
@@ -179,19 +183,12 @@ export default function Pacientes() {
         </div>
 
         {/* BUSCA */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-5">
-          <div className="flex items-center gap-3 border border-slate-200 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-            <Search size={18} className="text-slate-400" />
-
-            <input
-              type="text"
-              placeholder="Buscar por nome, CPF ou suspeita..."
-              className="w-full outline-none text-sm text-slate-700 bg-transparent"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-            />
-          </div>
-        </div>
+        <SearchCard
+          label="Buscar paciente"
+          placeholder="Buscar por nome, cpf ou suspeita..."
+          value={busca}
+          onChange={setBusca}
+        />
 
         {/* TABELA */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -263,7 +260,9 @@ export default function Pacientes() {
                   </tr>
                 ) : (
                   filtrados.map((p, i) => {
-                    const foto = isUbs ? getFoto(p.cpf) : p.foto;
+                    const foto = isUbs
+                      ? p.foto || p.fotoPerfil || getFoto(p.cpf)
+                      : p.foto || p.fotoPerfil;
 
                     return (
                       <tr
@@ -281,8 +280,8 @@ export default function Pacientes() {
                                 className="w-10 h-10 rounded-full object-cover border border-slate-200"
                               />
                             ) : (
-                              <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
-                                <User size={18} className="text-slate-400" />
+                              <div className="w-[38px] h-[38px] rounded-full bg-[#f3f4f6] border-2 border-[#e5e7eb] flex items-center justify-center shrink-0">
+                                <User size={20} className="text-[#9ca3af]" />
                               </div>
                             )}
 
@@ -325,10 +324,10 @@ export default function Pacientes() {
                         <td className="px-5 py-4 text-right">
                           <button
                             onClick={() => verDetalhes(p)}
-                            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 border border-slate-200 rounded-xl px-4 py-2 hover:bg-slate-50 transition-all"
+                            className="btn-ver-detalhes"
                           >
                             Ver detalhes
-                            <ArrowRight size={14} />
+                            <ChevronRight size={14} />
                           </button>
                         </td>
                       </tr>

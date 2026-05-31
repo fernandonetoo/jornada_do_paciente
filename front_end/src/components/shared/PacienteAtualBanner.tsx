@@ -1,4 +1,4 @@
-import { ArrowLeft, User } from "lucide-react";
+import { ChevronLeft, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { PacienteAtual } from "../../hooks/usePacienteAtual";
 import "../../pages/forms-medicos.css";
@@ -48,7 +48,7 @@ export function PacienteAtualBanner({
         className="btn-cancelar paciente-atual-trocar"
         onClick={() => navigate(voltarPara)}
       >
-        <ArrowLeft size={16} />
+        <ChevronLeft size={16} />
         Voltar para pacientes
       </button>
     </section>

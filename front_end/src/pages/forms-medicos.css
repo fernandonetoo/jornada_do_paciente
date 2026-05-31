@@ -79,6 +79,33 @@
   font-weight: 700;
 }
 
+.page-badge-exames {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: auto;
+  text-align: left;
+}
+
+.page-badge-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: #f5f3ff;
+  color: #7c3aed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.page-badge-teleconsulta .page-badge-icon,
+.tabela-consultas-header .page-badge-icon {
+  background: #ecfdf5;
+  color: #059669;
+}
+
 .form-card {
   width: 100%;
   margin-bottom: 18px;
@@ -143,8 +170,10 @@
 .avatar-placeholder {
   display: grid;
   place-items: center;
-  color: #94a3b8;
-  background: #f1f5f9;
+  color: #9ca3af;
+  background: #f3f4f6;
+  border: 2px solid #e5e7eb;
+  border-radius: 999px;
 }
 
 .card-paciente {
@@ -197,8 +226,9 @@
   place-items: center;
   overflow: hidden;
   border-radius: 999px;
-  background: #e8f4f8;
-  color: var(--jp-primary);
+  background: #f3f4f6;
+  border: 2px solid #e5e7eb;
+  color: #9ca3af;
 }
 
 .paciente-atual-avatar img {
@@ -298,6 +328,50 @@
   gap: 16px;
 }
 
+.form-grid-busca-exame {
+  align-items: end;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px) auto;
+}
+
+.form-group-botao-exame {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.form-grid-busca-exame .form-input:focus {
+  border-color: #cbd5e1;
+  box-shadow: none;
+}
+
+.select-status-exame {
+  appearance: none;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #64748b 50%),
+    linear-gradient(135deg, #64748b 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 13px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  border-color: var(--jp-border);
+  color: #475569;
+  font-weight: 600;
+  padding-right: 36px;
+}
+
+.select-status-exame:hover {
+  border-color: var(--jp-border);
+  background-color: #f8fafc;
+}
+
+.select-status-exame option {
+  background: #ffffff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .form-group {
   min-width: 0;
 }
@@ -384,6 +458,60 @@ select.form-input {
   background: var(--jp-primary-hover);
 }
 
+.btn-novo-exame {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 8px;
+  border-color: #2563eb;
+  background: #2563eb;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.3);
+}
+
+.btn-novo-exame:hover {
+  background: #1d4ed8;
+}
+
+.btn-nova-teleconsulta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 8px;
+  border-color: #2563eb;
+  background: #2563eb;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.3);
+}
+
+.btn-nova-teleconsulta:hover {
+  background: #1d4ed8;
+}
+
+.btn-salvar-exame {
+  border-color: #16a34a;
+  background: #16a34a;
+}
+
+.btn-salvar-exame:hover {
+  background: #15803d;
+}
+
+.btn-salvar-consulta {
+  border-color: #16a34a;
+  background: #16a34a;
+}
+
+.btn-salvar-consulta:hover {
+  background: #15803d;
+}
+
 .btn-cancelar {
   border: 1px solid var(--jp-border);
   background: #ffffff;
@@ -392,6 +520,40 @@ select.form-input {
 
 .btn-cancelar:hover {
   background: #f8fafc;
+}
+
+.btn-ver-detalhes {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 34px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #334155;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn-ver-detalhes:hover {
+  background: #f8fafc;
+}
+
+.btn-cancelar-modal {
+  border-color: var(--jp-danger);
+  background: var(--jp-danger);
+  color: #ffffff;
+}
+
+.btn-cancelar-modal:hover {
+  background: #b91c1c;
 }
 
 .btn-excluir {
@@ -442,6 +604,97 @@ select.form-input {
   color: var(--jp-muted);
   text-align: center;
   padding: 28px 16px;
+}
+
+.tabela-exames-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tabela-exames-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tabela-exames-header-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.tabela-exames-header span {
+  flex: 1;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.tabela-exames-atendimento {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  color: #374151;
+}
+
+.tabela-exames-atendimento thead tr {
+  background: #f8fafc;
+}
+
+.tabela-exames-atendimento th {
+  padding: 13px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tabela-exames-atendimento td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.tabela-exames-atendimento tbody tr:nth-child(odd) {
+  background: #ffffff;
+}
+
+.tabela-exames-atendimento tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.tabela-exames-atendimento tbody tr {
+  transition: background 0.15s;
+}
+
+.tabela-exames-atendimento tbody tr:hover {
+  background: #eff6ff;
+}
+
+.tabela-exames-atendimento tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tabela-exames-atendimento td[colspan] {
+  color: #9ca3af;
+  font-size: 15px;
+  text-align: center;
+  padding: 56px 20px;
+}
+
+.tabela-exames-atendimento th:last-child,
+.tabela-exames-atendimento td:last-child {
+  text-align: right;
 }
 
 .tabela-moderna td:last-child > div,

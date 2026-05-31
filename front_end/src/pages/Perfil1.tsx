@@ -3,6 +3,7 @@ import Header from "../components/Header1";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import BotaoVoltar from "../components/BotaoVoltar";
+import { Camera, CameraOff, Lock, LogOut, Pencil, SquarePen, User } from "lucide-react";
 import "./Perfil1.css";
 import { clearSession, updateProfile } from "../services/backend";
 import { useToast } from "../hooks/useToast";
@@ -16,7 +17,6 @@ export default function Perfil() {
 
   const [menuAberto, setMenuAberto] = useState(false);
   const [editando, setEditando] = useState(false);
-  const [toast, setToast] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -35,8 +35,10 @@ export default function Perfil() {
   const [cartaoSus, setCartaoSus] = useState(usuario?.cartaoSus || "");
 
   useEffect(() => {
-    if (usuario?.foto) {
-      setFoto(usuario.foto);
+    const fotoUsuario = usuario?.foto || usuario?.fotoPerfil || null;
+
+    if (fotoUsuario) {
+      setFoto(fotoUsuario);
     } else {
       setFoto(null);
     }
@@ -166,9 +168,6 @@ export default function Perfil() {
     try {
       await updateProfile(atualizado);
       setEditando(false);
-      setToast(true);
-
-      setTimeout(() => setToast(false), 2800);
       appToast.success({
         title: "Perfil salvo",
         description: "As alterações do perfil foram salvas com sucesso.",
@@ -210,14 +209,25 @@ export default function Perfil() {
       <div className="perfil-container">
         <div className="perfil-header-card">
           <div className="perfil-foto-wrap">
-            <img
-              src={foto || "/default-user.png"}
-              className="perfil-foto"
-              onClick={() => setMenuAberto(!menuAberto)}
-              alt="Foto de perfil"
-            />
+            {foto ? (
+              <img
+                src={foto}
+                className="perfil-foto"
+                onClick={() => setMenuAberto(!menuAberto)}
+                alt="Foto de perfil"
+              />
+            ) : (
+              <button
+                type="button"
+                className="perfil-foto perfil-foto-placeholder"
+                onClick={() => setMenuAberto(!menuAberto)}
+                aria-label="Adicionar foto de perfil"
+              >
+                <User size={40} color="#0b4f6c" />
+              </button>
+            )}
 
-            <span className="perfil-camera-badge">📷</span>
+            <span className="perfil-camera-badge"><Pencil size={15} /></span>
 
             {menuAberto && (
               <div className="perfil-menu-foto">
@@ -228,7 +238,8 @@ export default function Perfil() {
                     setMenuAberto(false);
                   }}
                 >
-                  📷 Trocar foto
+                  <Camera size={16} />
+                  Trocar foto
                 </div>
 
                 {foto && (
@@ -236,7 +247,8 @@ export default function Perfil() {
                     className="perfil-menu-item danger"
                     onClick={removerFoto}
                   >
-                    🗑 Remover foto
+                    <CameraOff size={16} />
+                    Remover foto
                   </div>
                 )}
               </div>
@@ -260,7 +272,8 @@ export default function Perfil() {
               className="perfil-btn-trocar-foto"
               onClick={() => setMenuAberto(!menuAberto)}
             >
-              📷 Editar foto
+              <Pencil size={16} />
+              Editar foto
             </button>
           </div>
         </div>
@@ -343,7 +356,8 @@ export default function Perfil() {
               className="perfil-btn-editar"
               onClick={() => setEditando(true)}
             >
-              ✏ Editar dados
+              <SquarePen size={16} />
+              Editar dados
             </button>
           ) : (
             <>
@@ -378,22 +392,18 @@ export default function Perfil() {
             className="perfil-opcao"
             onClick={() => navigate("/alterarsenha")}
           >
-            🔒 Alterar senha
+            <Lock size={16} />
+            Alterar senha
             <span className="perfil-opcao-arrow">›</span>
           </div>
 
           <div className="perfil-opcao logout" onClick={logout}>
-            🚪 Sair da conta
+            <LogOut size={16} />
+            Sair da conta
             <span className="perfil-opcao-arrow">›</span>
           </div>
         </div>
       </div>
-
-      {toast && (
-        <div className="perfil-toast">
-          ✅ Dados atualizados com sucesso!
-        </div>
-      )}
 
       <BotaoVoltar />
       {confirmationModal}

@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "../pages/forms-medicos.css";
 import { PacienteAtualBanner, NenhumPacienteSelecionado } from "../components/shared/PacienteAtualBanner";
 import { usePacienteAtual } from "../hooks/usePacienteAtual";
+import SearchCard from "../components/shared/SearchCard";
 
 export default function Exames() {
   const navigate = useNavigate();
@@ -104,23 +105,12 @@ export default function Exames() {
         <PacienteAtualBanner paciente={paciente} />
 
         {/* BUSCA */}
-        <div className="form-card">
-          <div className="form-group">
-
-            <label className="form-label">
-              Buscar exame
-            </label>
-
-            <input
-              className="form-input"
-              placeholder="Buscar por tipo..."
-              value={busca}
-              onChange={(e) =>
-                setBusca(e.target.value)
-              }
-            />
-          </div>
-        </div>
+        <SearchCard
+          label="Buscar exame"
+          placeholder="Buscar por tipo..."
+          value={busca}
+          onChange={setBusca}
+        />
 
         {/* TABELA */}
         <div className="form-card">

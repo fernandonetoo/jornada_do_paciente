@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronRight } from "lucide-react";
 import BotaoVoltar from "../components/BotaoVoltar";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
@@ -77,7 +78,10 @@ export default function Exames() {
         exame.status === "Concluído" || exame.status === "Realizado" ? (
           <button className="btn-salvar compact-action">Ver resultado</button>
         ) : (
-          <button className="btn-cancelar">Ver detalhes &gt;</button>
+          <button className="btn-ver-detalhes">
+            Ver detalhes
+            <ChevronRight size={14} />
+          </button>
         ),
     },
   ];

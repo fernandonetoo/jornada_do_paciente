@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
+import { User } from "lucide-react";
 
 export default function Header1() {
   const navigate = useNavigate();
@@ -44,20 +45,41 @@ export default function Header1() {
       {/* ÍCONES */}
       
 
-        <img
-          src={foto ? foto : "/default-user.png"} 
-          alt="perfil"
-          onClick={() => navigate("/perfil1")}
-          style={{ 
-            width: "36px",
-            height: "36px",
-            borderRadius: "50%",
-            objectFit: "cover",
-            cursor: "pointer",
-            border: "0px solid #0ea5a4"
-
-          }}
-        />
+        {foto ? (
+          <img
+            src={foto}
+            alt="perfil"
+            onClick={() => navigate("/perfil1")}
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              objectFit: "cover",
+              cursor: "pointer",
+              border: "0px solid #0ea5a4"
+            }}
+          />
+        ) : (
+          <button
+            type="button"
+            aria-label="Abrir perfil"
+            onClick={() => navigate("/perfil1")}
+            style={{
+              width: "38px",
+              height: "38px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "#f3f4f6",
+              border: "2px solid #e5e7eb",
+              cursor: "pointer",
+              padding: 0
+            }}
+          >
+            <User size={20} color="#9ca3af" />
+          </button>
+        )}
 
       </div>
     

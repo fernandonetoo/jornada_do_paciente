@@ -5,6 +5,7 @@ import { useState } from "react";
 import "../pages/forms-medicos.css";
 import { PacienteAtualBanner, NenhumPacienteSelecionado } from "../components/shared/PacienteAtualBanner";
 import { usePacienteAtual } from "../hooks/usePacienteAtual";
+import SearchCard from "../components/shared/SearchCard";
 
 export default function Regulacoes() {
   const location = useLocation();
@@ -85,22 +86,12 @@ export default function Regulacoes() {
         <PacienteAtualBanner paciente={paciente} />
 
         {/* BUSCA */}
-        <div className="form-card">
-          <div className="form-group">
-            <label className="form-label">
-              Buscar regulação
-            </label>
-
-            <input
-              className="form-input"
-              placeholder="Buscar por tipo..."
-              value={busca}
-              onChange={(e) =>
-                setBusca(e.target.value)
-              }
-            />
-          </div>
-        </div>
+        <SearchCard
+          label="Buscar regulação"
+          placeholder="Buscar por tipo..."
+          value={busca}
+          onChange={setBusca}
+        />
 
         {/* TABELA */}
         <div className="form-card">

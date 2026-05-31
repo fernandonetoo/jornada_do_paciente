@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import logo from "../assets/logo2.png";
+import logo from "../assets/logo2.jpeg";
 import { registerPaciente } from "../services/backend";
 import { useToast } from "../hooks/useToast";
 

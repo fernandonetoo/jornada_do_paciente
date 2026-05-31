@@ -124,7 +124,7 @@ export default function PacienteDetalhe() {
               <div style={styles.avatar}>
                 <User
                   size={60}
-                  color="#6b7280"
+                  color="#9ca3af"
                 />
               </div>
             )}
@@ -402,7 +402,8 @@ const styles: any = {
     width: "140px",
     height: "140px",
     borderRadius: "50%",
-    background: "#e5e7eb",
+    background: "#f3f4f6",
+    border: "2px solid #e5e7eb",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

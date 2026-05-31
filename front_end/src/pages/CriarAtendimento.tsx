@@ -1,7 +1,7 @@
 import Header1 from "../components/Header1";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { User, Search, Plus, X, ChevronRight, Users } from "lucide-react";
+import { User, Search, Plus, X, ChevronRight, Activity, Users } from "lucide-react";
 import BotaoVoltar from "@/components/BotaoVoltar";
 import { saveCollection } from "../services/backend";
 import { useToast } from "../hooks/useToast";
@@ -132,31 +132,53 @@ export default function Atendimentos() {
             <h2 style={s.title}>Atendimentos</h2>
             <p style={s.subtitle}>Gerencie e acompanhe todos os pacientes atendidos</p>
           </div>
-          <button style={s.btnNovo} onClick={() => setAbrirModal(true)}>
-            <Plus size={16} />
-            Novo Atendimento
-          </button>
+
+          <div className="flex items-center gap-4 bg-white rounded-2xl px-5 py-4 border border-slate-200 shadow-sm font-sans">
+            <div className="w-11 h-11 rounded-xl bg-[#e8f4f8] flex items-center justify-center shrink-0">
+              <Activity size={22} className="text-[#0b4f6c]" />
+            </div>
+            <div>
+              <span className="block text-2xl font-extrabold text-[#0b4f6c] leading-none">
+                {pacientes.length}
+              </span>
+              <span className="block text-xs text-slate-500 mt-1">
+                Total de atendimentos
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Barra de busca + contador */}
-        <div style={s.toolbar}>
-          <div style={s.searchWrapper}>
-            <Search size={16} color="#9ca3af" style={{ flexShrink: 0 }} />
-            <input
-              placeholder="Buscar por nome, CPF ou suspeita..."
-              style={s.inputSearch}
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-            />
-          </div>
-          <div style={s.badge}>
-            <Users size={14} />
-            {pacientesFiltrados.length} paciente{pacientesFiltrados.length !== 1 ? "s" : ""}
+        {/* Barra de busca + novo atendimento */}
+        <div style={s.toolbarCard}>
+          <div style={s.toolbar}>
+            <div style={s.searchWrapper}>
+              <Search size={16} color="#9ca3af" style={{ flexShrink: 0 }} />
+              <input
+                placeholder="Buscar por nome, CPF ou suspeita..."
+                style={s.inputSearch}
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+              />
+            </div>
+            <button style={s.btnNovo} onClick={() => setAbrirModal(true)}>
+              <Plus size={16} />
+              Novo Atendimento
+            </button>
           </div>
         </div>
 
         {/* Tabela */}
         <div style={s.tableWrapper} className="animate-fade-in">
+          <div style={s.tableHeader}>
+            <div style={s.tableHeaderIcon}>
+              <Users size={16} color="#0b4f6c" />
+            </div>
+
+            <span style={s.tableHeaderTitle}>
+              Lista de pacientes
+            </span>
+          </div>
+
           <table style={s.table}>
             <thead>
               <tr style={s.thead}>
@@ -382,28 +404,51 @@ const s: any = {
   btnNovo: {
     display: "flex", alignItems: "center", gap: "7px",
     background: "#2563eb", color: "#fff", border: "none",
-    padding: "10px 18px", borderRadius: "8px", cursor: "pointer",
+    height: "44px", padding: "0 18px", borderRadius: "8px", cursor: "pointer",
     fontSize: "14px", fontWeight: 600, boxShadow: "0 1px 4px rgba(37,99,235,0.3)",
+    whiteSpace: "nowrap",
   },
 
-  toolbar: { display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" },
+  toolbarCard: {
+    width: "100%",
+    marginBottom: "18px",
+    padding: "22px",
+    border: "1px solid #e2e8f0",
+    borderRadius: "16px",
+    background: "#ffffff",
+    boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
+  },
+
+  toolbar: { display: "flex", alignItems: "center", gap: "12px", marginBottom: 0 },
 
   searchWrapper: {
-    display: "flex", alignItems: "center", gap: "10px",
+    display: "flex", alignItems: "center", gap: "0px",
     background: "#fff", border: "1px solid #e5e7eb",
-    borderRadius: "8px", padding: "9px 14px", flex: 1,
+    height: "47px", borderRadius: "12px", padding: "0 14px", flex: 1,
     boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
   },
 
-  inputSearch: { border: "none", outline: "none", fontSize: "14px", width: "100%", fontFamily: "inherit" },
-
-  badge: {
-    display: "flex", alignItems: "center", gap: "6px",
-    background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe",
-    borderRadius: "20px", padding: "6px 14px", fontSize: "13px", fontWeight: 600, whiteSpace: "nowrap",
+  inputSearch: {
+    border: "none", outline: "none", boxShadow: "none",
+    fontSize: "14px", width: "100%", fontFamily: "inherit",
   },
 
   tableWrapper: { background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" },
+
+  tableHeader: {
+    display: "flex", alignItems: "center", gap: "8px",
+    padding: "16px 20px", borderBottom: "1px solid #f1f5f9",
+  },
+
+  tableHeaderIcon: {
+    width: "32px", height: "32px", borderRadius: "8px",
+    background: "#e8f4f8", display: "flex", alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
+  },
+
+  tableHeaderTitle: {
+    flex: 1, color: "#0f172a", fontSize: "15px", fontWeight: 700,
+  },
 
   table: { width: "100%", borderCollapse: "collapse" },
 
@@ -438,10 +483,12 @@ const s: any = {
   },
 
   btnDetalhes: {
-    display: "inline-flex", alignItems: "center", gap: "4px",
-    background: "transparent", border: "1.5px solid #2563eb", color: "#2563eb",
-    padding: "6px 12px", borderRadius: "6px", cursor: "pointer",
-    fontSize: "13px", fontWeight: 600, transition: "all 0.15s",
+    display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px",
+    background: "#ffffff", border: "1px solid #e2e8f0", color: "#334155",
+    padding: "8px 16px", borderRadius: "12px", cursor: "pointer",
+    minHeight: "34px", fontSize: "12px", fontWeight: 600, lineHeight: 1,
+    fontFamily: "inherit",
+    whiteSpace: "nowrap", transition: "background 0.15s, border-color 0.15s, color 0.15s",
   },
 
   empty: { textAlign: "center", padding: "56px 20px", color: "#9ca3af", fontSize: "15px" },
@@ -495,7 +542,7 @@ const s: any = {
   },
 
   btnCancelar: {
-    background: "#f3f4f6", border: "none", color: "#374151",
+    background: "#dc2626", border: "none", color: "#fff",
     padding: "10px 20px", borderRadius: "8px", cursor: "pointer",
     fontSize: "14px", fontWeight: 600,
   },

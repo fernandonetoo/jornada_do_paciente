@@ -1,13 +1,13 @@
 import Header from "../components/Header1";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
+import { Plus, Search, Video } from "lucide-react";
 import BotaoVoltar from "../components/BotaoVoltar";
 import "../pages/forms-medicos.css";
 import { saveCollection } from "../services/backend";
 import { useToast } from "../hooks/useToast";
 import { useConfirm } from "../components/shared/useConfirm";
-import StatusDateFilters from "../components/shared/StatusDateFilters";
-import { matchesDateRange, matchesStatus } from "../lib/filters";
+import { matchesStatus } from "../lib/filters";
 import { PacienteAtualBanner, NenhumPacienteSelecionado } from "../components/shared/PacienteAtualBanner";
 import { usePacienteAtual } from "../hooks/usePacienteAtual";
 
@@ -39,8 +39,6 @@ export default function Consultas() {
 
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
-  const [dataInicial, setDataInicial] = useState("");
-  const [dataFinal, setDataFinal] = useState("");
 
   const [editandoIndex, setEditandoIndex] =
     useState<number | null>(null);
@@ -91,10 +89,7 @@ export default function Consultas() {
         .toLowerCase()
         .includes(busca.toLowerCase())
     )
-    .filter((c: any) => matchesStatus(c.status, filtroStatus))
-    .filter((c: any) =>
-      matchesDateRange(c.dataSolicitacao, dataInicial, dataFinal)
-    );
+    .filter((c: any) => matchesStatus(c.status, filtroStatus));
 
   function limparFormulario() {
     setTipo("");
@@ -254,14 +249,20 @@ export default function Consultas() {
             </p>
           </div>
 
-          <div className="page-badge">
-            <strong>
-              {consultas.length}
-            </strong>
+          <div className="page-badge page-badge-exames page-badge-teleconsulta">
+            <div className="page-badge-icon">
+              <Video size={22} />
+            </div>
 
-            <span>
-              Consultas cadastradas
-            </span>
+            <div>
+              <strong>
+                {consultas.length}
+              </strong>
+
+              <span>
+                Consultas cadastradas
+              </span>
+            </div>
           </div>
         </div>
 
@@ -269,59 +270,83 @@ export default function Consultas() {
 
         {/* BUSCA */}
         <div className="form-card">
-          <div className="form-group">
-            <label className="form-label">
-              Buscar consulta
-            </label>
+          <div className="form-grid form-grid-busca-exame">
+            <div className="form-group">
+              <label className="form-label">
+                Buscar consulta
+              </label>
 
-            <input
-              className="form-input"
-              placeholder="Buscar por tipo..."
-              value={busca}
-              onChange={(e) =>
-                setBusca(e.target.value)
-              }
-            />
+              <div className="search-card-input">
+                <Search size={17} aria-hidden="true" />
+                <input
+                  className="form-input"
+                  placeholder="Buscar por tipo..."
+                  value={busca}
+                  onChange={(e) =>
+                    setBusca(e.target.value)
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                Status
+              </label>
+
+              <select
+                className="form-input select-status-exame"
+                value={filtroStatus}
+                onChange={(e) =>
+                  setFiltroStatus(e.target.value)
+                }
+              >
+                <option value="">
+                  Todos os status
+                </option>
+                <option value="Agendado">
+                  Agendado
+                </option>
+                <option value="Realizado">
+                  Realizado
+                </option>
+                <option value="Cancelado">
+                  Cancelado
+                </option>
+                <option value="Em andamento">
+                  Em andamento
+                </option>
+              </select>
+            </div>
+
+            <div className="form-group form-group-botao-exame">
+              <button
+                className="btn-salvar btn-nova-teleconsulta"
+                onClick={() =>
+                  setMostrarForm(true)
+                }
+              >
+                <Plus size={16} />
+                Nova Teleconsulta
+              </button>
+            </div>
           </div>
         </div>
 
         {/* BOTÃO */}
-        <StatusDateFilters
-          statusValue={filtroStatus}
-          statusOptions={["Agendado", "Realizado", "Cancelado", "Em andamento"]}
-          dateStart={dataInicial}
-          dateEnd={dataFinal}
-          onStatusChange={setFiltroStatus}
-          onDateStartChange={setDataInicial}
-          onDateEndChange={setDataFinal}
-          onClear={() => {
-            setFiltroStatus("");
-            setDataInicial("");
-            setDataFinal("");
-          }}
-        />
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent:
-              "flex-end",
-            marginBottom: 20,
-          }}
-        >
-          <button
-            className="btn-salvar"
-            onClick={() =>
-              setMostrarForm(true)
-            }
-          >
-            + Nova Teleconsulta
-          </button>
-        </div>
-
         {/* TABELA */}
-        <div className="form-card">
-          <table className="tabela-moderna">
+        <div className="tabela-exames-wrapper animate-fade-in">
+          <div className="tabela-exames-header tabela-consultas-header">
+            <div className="page-badge-icon tabela-exames-header-icon">
+              <Video size={16} />
+            </div>
+
+            <span>
+              Lista de teleconsultas
+            </span>
+          </div>
+
+          <table className="tabela-exames-atendimento">
             <thead>
               <tr>
                 <th>Tipo</th>
@@ -378,6 +403,9 @@ export default function Consultas() {
                             display:
                               "flex",
                             gap: 10,
+                            justifyContent:
+                              "flex-end",
+                            flexWrap: "wrap",
                           }}
                         >
                           <button
@@ -392,7 +420,7 @@ export default function Consultas() {
                           </button>
 
                           <button
-                            className="btn-cancelar"
+                            className="btn-excluir"
                             disabled={excluindoIndex !== null}
                             onClick={() =>
                               excluirConsulta(
@@ -588,7 +616,7 @@ export default function Consultas() {
 
               <div className="form-actions">
                 <button
-                  className="btn-cancelar"
+                  className="btn-cancelar btn-cancelar-modal"
                   disabled={salvando}
                   onClick={() => {
                     limparFormulario();
@@ -600,7 +628,7 @@ export default function Consultas() {
                 </button>
 
                 <button
-                  className="btn-salvar"
+                  className="btn-salvar btn-salvar-consulta"
                   disabled={salvando}
                   onClick={salvarConsulta}
                 >

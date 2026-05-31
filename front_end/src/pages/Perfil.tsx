@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import BotaoVoltar from "../components/BotaoVoltar";
-import { User } from "lucide-react";
+import { Camera, CameraOff, Lock, LogOut, Pencil, SquarePen, User } from "lucide-react";
 import "./Perfil1.css";
 import { clearSession, updateProfile } from "../services/backend";
 import { useToast } from "../hooks/useToast";
@@ -18,7 +18,6 @@ export default function Perfil() {
 
   const [menuAberto, setMenuAberto] = useState(false);
   const [editando, setEditando] = useState(false);
-  const [toast, setToast] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -156,8 +155,6 @@ export default function Perfil() {
     try {
       await updateProfile(atualizado);
       setEditando(false);
-      setToast(true);
-      setTimeout(() => setToast(false), 2800);
       appToast.success({
         title: "Perfil salvo",
         description: "As alterações do perfil foram salvas com sucesso.",
@@ -219,12 +216,7 @@ export default function Perfil() {
               )}
             </div>
 
-            <span 
-              className="perfil-camera-badge" 
-              onClick={() => setMenuAberto(!menuAberto)}
-            >
-              📷
-            </span>
+            <span className="perfil-camera-badge" onClick={() => setMenuAberto(!menuAberto)}><Pencil size={15} /></span>
 
             {menuAberto && (
               <div className="perfil-menu-foto">
@@ -235,7 +227,8 @@ export default function Perfil() {
                     setMenuAberto(false);
                   }}
                 >
-                  📷 Trocar foto
+                  <Camera size={16} />
+                  Trocar foto
                 </div>
 
                 {foto && (
@@ -243,7 +236,8 @@ export default function Perfil() {
                     className="perfil-menu-item danger"
                     onClick={removerFoto}
                   >
-                    🗑 Remover foto
+                    <CameraOff size={16} />
+                    Remover foto
                   </div>
                 )}
               </div>
@@ -267,7 +261,8 @@ export default function Perfil() {
               className="perfil-btn-trocar-foto"
               onClick={() => setMenuAberto(!menuAberto)}
             >
-              📷 Editar foto
+              <Pencil size={16} />
+              Editar foto
             </button>
           </div>
         </div>
@@ -349,7 +344,8 @@ export default function Perfil() {
               className="perfil-btn-editar"
               onClick={() => setEditando(true)}
             >
-              ✏ Editar dados
+              <SquarePen size={16} />
+              Editar dados
             </button>
           ) : (
             <>
@@ -382,23 +378,18 @@ export default function Perfil() {
             className="perfil-opcao"
             onClick={() => navigate("/alterarsenha")}
           >
-            🔒 Alterar senha
+            <Lock size={16} />
+            Alterar senha
             <span className="perfil-opcao-arrow">›</span>
           </div>
 
           <div className="perfil-opcao logout" onClick={logout}>
-            🚪 Sair da conta
+            <LogOut size={16} />
+            Sair da conta
             <span className="perfil-opcao-arrow">›</span>
           </div>
         </div>
       </div>
-
-      {/* AVISO DE SUCESSO FLUTUANTE (TOAST) */}
-      {toast && (
-        <div className="perfil-toast">
-          ✅ Dados atualizados com sucesso!
-        </div>
-      )}
 
       <BotaoVoltar />
       {confirmationModal}

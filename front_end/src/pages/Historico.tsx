@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { ChevronRight } from "lucide-react";
 import BotaoVoltar from "../components/BotaoVoltar";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
 import StatusBadge from "../components/shared/StatusBadge";
 import StatusDateFilters from "../components/shared/StatusDateFilters";
+import SearchCard from "../components/shared/SearchCard";
 import { matchesDateRange, matchesStatus } from "../lib/filters";
 import "../pages/forms-medicos.css";
 
@@ -63,17 +65,12 @@ export default function Diagnosticos() {
         </div>
 
         {/* BUSCA */}
-        <div className="form-card">
-          <div className="form-group">
-            <label className="form-label">Buscar diagnóstico</label>
-            <input
-              className="form-input"
-              placeholder="Buscar por nome da condição..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-            />
-          </div>
-        </div>
+        <SearchCard
+          label="Buscar diagnóstico"
+          placeholder="Buscar por nome da condição..."
+          value={busca}
+          onChange={setBusca}
+        />
 
         <StatusDateFilters
           statusValue={filtroStatus}
@@ -127,10 +124,11 @@ export default function Diagnosticos() {
 
                     <td>
                       <button 
-                        className="btn-cancelar"
+                        className="btn-ver-detalhes"
                         onClick={() => setSelecionado(d)}
                       >
-                        Ver detalhes &gt;
+                        Ver detalhes
+                        <ChevronRight size={14} />
                       </button>
                     </td>
                   </tr>

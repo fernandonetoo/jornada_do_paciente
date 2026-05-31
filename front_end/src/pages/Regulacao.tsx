@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronRight } from "lucide-react";
 import BotaoVoltar from "../components/BotaoVoltar";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
@@ -77,8 +78,9 @@ export default function RegulacaoPage() {
       key: "acoes",
       header: "Ações",
       render: (regulacao) => (
-        <button className="btn-cancelar" onClick={() => setSelecionado(regulacao)}>
-          Ver detalhes &gt;
+        <button className="btn-ver-detalhes" onClick={() => setSelecionado(regulacao)}>
+          Ver detalhes
+          <ChevronRight size={14} />
         </button>
       ),
     },

@@ -1,13 +1,13 @@
 import Header from "../components/Header1";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
+import { FlaskConical, Plus, Search } from "lucide-react";
 import BotaoVoltar from "../components/BotaoVoltar";
 import "../pages/forms-medicos.css";
 import { saveCollection } from "../services/backend";
 import { useToast } from "../hooks/useToast";
 import { useConfirm } from "../components/shared/useConfirm";
-import StatusDateFilters from "../components/shared/StatusDateFilters";
-import { matchesDateRange, matchesStatus } from "../lib/filters";
+import { matchesStatus } from "../lib/filters";
 import { PacienteAtualBanner, NenhumPacienteSelecionado } from "../components/shared/PacienteAtualBanner";
 import { usePacienteAtual } from "../hooks/usePacienteAtual";
 
@@ -40,8 +40,6 @@ export default function Exames() {
 
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
-  const [dataInicial, setDataInicial] = useState("");
-  const [dataFinal, setDataFinal] = useState("");
 
   const [
     mostrarResultado,
@@ -112,10 +110,7 @@ export default function Exames() {
         .toLowerCase()
         .includes(busca.toLowerCase())
     )
-    .filter((e: any) => matchesStatus(e.status, filtroStatus))
-    .filter((e: any) =>
-      matchesDateRange(e.dataSolicitacao, dataInicial, dataFinal)
-    );
+    .filter((e: any) => matchesStatus(e.status, filtroStatus));
 
   function limparFormulario() {
     setTipo("");
@@ -354,14 +349,20 @@ export default function Exames() {
             </p>
           </div>
 
-          <div className="page-badge">
-            <strong>
-              {exames.length}
-            </strong>
+          <div className="page-badge page-badge-exames">
+            <div className="page-badge-icon">
+              <FlaskConical size={22} />
+            </div>
 
-            <span>
-              Exames cadastrados
-            </span>
+            <div>
+              <strong>
+                {exames.length}
+              </strong>
+
+              <span>
+                Exames cadastrados
+              </span>
+            </div>
           </div>
         </div>
 
@@ -369,59 +370,83 @@ export default function Exames() {
 
         {/* BUSCA */}
         <div className="form-card">
-          <div className="form-group">
-            <label className="form-label">
-              Buscar exame
-            </label>
+          <div className="form-grid form-grid-busca-exame">
+            <div className="form-group">
+              <label className="form-label">
+                Buscar exame
+              </label>
 
-            <input
-              className="form-input"
-              placeholder="Buscar por tipo..."
-              value={busca}
-              onChange={(e) =>
-                setBusca(e.target.value)
-              }
-            />
+              <div className="search-card-input">
+                <Search size={17} aria-hidden="true" />
+                <input
+                  className="form-input"
+                  placeholder="Buscar por tipo..."
+                  value={busca}
+                  onChange={(e) =>
+                    setBusca(e.target.value)
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                Status
+              </label>
+
+              <select
+                className="form-input select-status-exame"
+                value={filtroStatus}
+                onChange={(e) =>
+                  setFiltroStatus(e.target.value)
+                }
+              >
+                <option value="">
+                  Todos os status
+                </option>
+                <option value="Agendado">
+                  Agendado
+                </option>
+                <option value="Em andamento">
+                  Em andamento
+                </option>
+                <option value="Concluido">
+                  Concluido
+                </option>
+                <option value="Cancelado">
+                  Cancelado
+                </option>
+              </select>
+            </div>
+
+            <div className="form-group form-group-botao-exame">
+              <button
+                className="btn-salvar btn-novo-exame"
+                onClick={() =>
+                  setMostrarForm(true)
+                }
+              >
+                <Plus size={16} />
+                Novo Exame
+              </button>
+            </div>
           </div>
         </div>
 
         {/* BOTÃO */}
-        <StatusDateFilters
-          statusValue={filtroStatus}
-          statusOptions={["Agendado", "Em andamento", "Concluido", "Cancelado"]}
-          dateStart={dataInicial}
-          dateEnd={dataFinal}
-          onStatusChange={setFiltroStatus}
-          onDateStartChange={setDataInicial}
-          onDateEndChange={setDataFinal}
-          onClear={() => {
-            setFiltroStatus("");
-            setDataInicial("");
-            setDataFinal("");
-          }}
-        />
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent:
-              "flex-end",
-            marginBottom: 20,
-          }}
-        >
-          <button
-            className="btn-salvar"
-            onClick={() =>
-              setMostrarForm(true)
-            }
-          >
-            + Novo Exame
-          </button>
-        </div>
-
         {/* TABELA */}
-        <div className="form-card">
-          <table className="tabela-moderna">
+        <div className="tabela-exames-wrapper animate-fade-in">
+          <div className="tabela-exames-header">
+            <div className="page-badge-icon tabela-exames-header-icon">
+              <FlaskConical size={16} />
+            </div>
+
+            <span>
+              Lista de exames
+            </span>
+          </div>
+
+          <table className="tabela-exames-atendimento">
             <thead>
               <tr>
                 <th>Tipo</th>
@@ -679,7 +704,7 @@ export default function Exames() {
               <div className="form-actions">
 
                 <button
-                  className="btn-cancelar"
+                  className="btn-cancelar btn-cancelar-modal"
                   disabled={salvando}
                   onClick={() => {
                     limparFormulario();
@@ -693,7 +718,7 @@ export default function Exames() {
                 </button>
 
                 <button
-                  className="btn-salvar"
+                  className="btn-salvar btn-salvar-exame"
                   disabled={salvando}
                   onClick={salvarExame}
                 >
@@ -732,7 +757,7 @@ export default function Exames() {
                     Resultado
                   </label>
 
-                  <input
+                  <select
                     className="form-input"
                     value={
                       resultadoTexto
@@ -742,7 +767,23 @@ export default function Exames() {
                         e.target.value
                       )
                     }
-                  />
+                  >
+                    <option value="">
+                      Selecione o resultado
+                    </option>
+                    <option value="Normal">
+                      Normal
+                    </option>
+                    <option value="Alterado">
+                      Alterado
+                    </option>
+                    <option value="Inconclusivo">
+                      Inconclusivo
+                    </option>
+                    <option value="Aguardando laudo">
+                      Aguardando laudo
+                    </option>
+                  </select>
                 </div>
 
                 <div className="form-group">
@@ -786,7 +827,7 @@ export default function Exames() {
               <div className="form-actions">
 
                 <button
-                  className="btn-cancelar"
+                  className="btn-cancelar btn-cancelar-modal"
                   disabled={salvandoResultado}
                   onClick={() =>
                     setMostrarResultado(
@@ -798,7 +839,7 @@ export default function Exames() {
                 </button>
 
                 <button
-                  className="btn-salvar"
+                  className="btn-salvar btn-salvar-exame"
                   disabled={salvandoResultado}
                   onClick={
                     salvarResultado

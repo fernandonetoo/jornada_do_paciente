@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ChevronRight } from "lucide-react";
 import BotaoVoltar from "../components/BotaoVoltar";
 import Header from "../components/Header";
 import Navbar from "../components/Navbar";
@@ -73,7 +74,12 @@ export default function Consultas() {
     {
       key: "acoes",
       header: "Ações",
-      render: () => <button className="btn-cancelar">Ver detalhes &gt;</button>,
+      render: () => (
+        <button className="btn-ver-detalhes">
+          Ver detalhes
+          <ChevronRight size={14} />
+        </button>
+      ),
     },
   ];
 
