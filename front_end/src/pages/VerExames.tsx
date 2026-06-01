@@ -203,7 +203,8 @@ function getStatusStyle(
 
   if (
     status === "Realizado" ||
-    status === "Concluído"
+    status === "Concluído" ||
+    status === "Concluido"
   ) {
     return {
       background: "#d1fae5",

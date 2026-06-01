@@ -1,5 +1,7 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from rest_framework import status, viewsets
@@ -497,12 +499,26 @@ class ChangePasswordView(APIView):
 
         if not request.user.check_password(senha_atual):
             return api_response(None, "Senha atual incorreta.", status.HTTP_400_BAD_REQUEST, False, {"senhaAtual": ["Senha atual incorreta."]})
-        if len(str(nova_senha)) < 6:
-            return api_response(None, "Dados inválidos.", status.HTTP_400_BAD_REQUEST, False, {"novaSenha": ["A nova senha deve ter no mínimo 6 caracteres."]})
+        if not nova_senha:
+            return api_response(None, "Dados invalidos.", status.HTTP_400_BAD_REQUEST, False, {"novaSenha": ["A nova senha e obrigatoria."]})
+
+        try:
+            validate_password(str(nova_senha), request.user)
+        except ValidationError as exc:
+            return api_response(None, "Dados invalidos.", status.HTTP_400_BAD_REQUEST, False, {"novaSenha": list(exc.messages)})
 
         request.user.set_password(nova_senha)
         request.user.save(update_fields=["password"])
-        return api_response(None, "Senha alterada com sucesso.")
+
+        refresh = RefreshToken.for_user(request.user)
+        data = {
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "usuario": frontend_user(request.user),
+            "usuarios": [frontend_user(item) for item in allowed_users_for(request.user)],
+            "collections": all_collections(request.user),
+        }
+        return api_response(data, "Senha alterada com sucesso.")
 
 
 class CollectionView(APIView):

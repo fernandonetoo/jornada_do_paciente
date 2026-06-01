@@ -92,12 +92,14 @@ export async function updateProfile(payload: any) {
 }
 
 export async function changePassword(senhaAtual: string, novaSenha: string) {
-  return unwrap<any>(
+  const data = unwrap<any>(
     await api.post("auth/change-password/", {
       senhaAtual,
       novaSenha,
     })
   );
+  persistBootstrap(data);
+  return data;
 }
 
 export function clearSession() {

@@ -12,28 +12,28 @@ import {
   MapPin,
   Cake,
   User,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
 } from "lucide-react";
 
-import BotaoVoltar from "@/components/BotaoVoltar";
-import { PacienteAtualBanner, NenhumPacienteSelecionado } from "@/components/shared/PacienteAtualBanner";
-import { usePacienteAtual } from "@/hooks/usePacienteAtual";
+import BotaoVoltar from "../components/BotaoVoltar";
+import { NenhumPacienteSelecionado } from "../components/shared/PacienteAtualBanner";
+import { usePacienteAtual } from "../hooks/usePacienteAtual";
 
 export default function PacienteDetalhe() {
   const navigate = useNavigate();
+
   const location = useLocation();
 
   const paciente = usePacienteAtual(location.state as any);
 
-  // 🔒 PROTEÇÃO
   useEffect(() => {
     const usuario = JSON.parse(
       localStorage.getItem("usuarioLogado") || "null"
     );
 
-    if (
-      !usuario ||
-      !usuario.grupos?.includes("medico_oncologista")
-    ) {
+    if (!usuario || !usuario.grupos?.includes("medico_oncologista")) {
       navigate("/");
     }
   }, [navigate]);
@@ -50,7 +50,7 @@ export default function PacienteDetalhe() {
             </h1>
 
             <p style={styles.subtitle}>
-              Selecione um paciente para visualizar o acompanhamento.
+              Selecione um paciente para visualizar e gerenciar informações.
             </p>
           </div>
 
@@ -61,69 +61,77 @@ export default function PacienteDetalhe() {
       </div>
     );
 
-  // 🔥 PACIENTES
-  const pacientesStorage = JSON.parse(
-    localStorage.getItem("pacientes") || "[]"
-  );
-
-  // 🔥 USUÁRIOS
-  const usuariosStorage = JSON.parse(
+  // FOTO PACIENTE
+  const usuarios = JSON.parse(
     localStorage.getItem("usuarios") || "[]"
   );
 
-  // 🔥 PACIENTE COMPLETO
-  const pacienteCompleto = pacientesStorage.find(
-    (p: any) =>
-      String(p.cpf).replace(/\D/g, "") ===
-      String(paciente.cpf).replace(/\D/g, "")
+  const usuarioPaciente = usuarios.find(
+    (u: any) => u.cpf === paciente.cpf
   );
 
-  // 🔥 FOTO
-  const usuarioComFoto = usuariosStorage.find(
-    (u: any) =>
-      String(u.cpf).replace(/\D/g, "") ===
-      String(paciente.cpf).replace(/\D/g, "")
-  );
-
-  const fotoPerfil =
-    usuarioComFoto?.fotoPerfil ||
-    usuarioComFoto?.foto ||
-    pacienteCompleto?.fotoPerfil ||
-    pacienteCompleto?.foto ||
+  const fotoPaciente =
+    usuarioPaciente?.foto ||
+    paciente?.foto ||
     "";
+
+  const suspeitaPaciente =
+    paciente.suspeita ||
+    paciente.queixaPrincipal ||
+    paciente.queixa ||
+    paciente.tipo ||
+    "";
+
+  // CONSULTAS
+  const consultas = JSON.parse(
+    localStorage.getItem("consulta") || "[]"
+  ).filter((c: any) => c.pacienteId === paciente.cpf);
+
+  // EXAMES
+  const exames = JSON.parse(
+    localStorage.getItem("exames") || "[]"
+  ).filter((e: any) => e.pacienteId === paciente.cpf);
+
+  // ENCAMINHAMENTOS
+  const regulacoes = JSON.parse(
+    localStorage.getItem("regulacao") || "[]"
+  ).filter((r: any) => r.pacienteId === paciente.cpf);
+
+  // DIAGNÓSTICOS
+  const diagnosticos = JSON.parse(
+    localStorage.getItem("diagnosticos") || "[]"
+  ).filter((d: any) => d.pacienteId === paciente.cpf);
 
   return (
     <div style={styles.container}>
       <Header1 />
 
       <div style={styles.content}>
-        {/* HEADER */}
+        {/* TÍTULO */}
         <div style={styles.headerText}>
           <h1 style={styles.title}>
             Gerenciar Paciente
           </h1>
 
           <p style={styles.subtitle}>
-            Visualize e acompanhe todas as informações do paciente.
+            Visualize e gerencie as informações do paciente.
           </p>
         </div>
-
-        <PacienteAtualBanner paciente={pacienteCompleto || paciente} />
 
         {/* CARD PACIENTE */}
         <div style={styles.card}>
           {/* FOTO */}
           <div style={styles.avatarContainer}>
-            {fotoPerfil ? (
+            {fotoPaciente ? (
               <img
-                src={fotoPerfil}
+                src={fotoPaciente}
                 alt="Paciente"
                 style={styles.avatarImg}
               />
             ) : (
               <div style={styles.avatar}>
                 <User
-                  size={60}
+                  size={45}
                   color="#9ca3af"
                 />
               </div>
@@ -132,48 +140,37 @@ export default function PacienteDetalhe() {
 
           {/* INFO */}
           <div style={styles.infoContainer}>
+            <span style={styles.pacienteLabel}>
+              Paciente selecionado
+            </span>
+
             <h2 style={styles.nome}>
-              {pacienteCompleto?.nome || paciente.nome}
+              {paciente.nome}
             </h2>
 
             <div style={styles.infoGrid}>
               <p style={styles.item}>
                 <CalendarDays size={16} />
-
                 Nascimento:
-                {" "}
-                {pacienteCompleto?.dataNascimento ||
-                  paciente.dataNascimento ||
-                  "-"}
+                {paciente.dataNascimento}
               </p>
 
               <p style={styles.item}>
                 <Cake size={16} />
-
                 Idade:
-                {" "}
-                {pacienteCompleto?.idade ||
-                  paciente.idade ||
-                  "-"}{" "}
-                anos
+                {paciente.idade} anos
               </p>
 
               <p style={styles.item}>
                 <IdCard size={16} />
-
                 CPF:
-                {" "}
-                {pacienteCompleto?.cpf || paciente.cpf}
+                {paciente.cpf}
               </p>
 
               <p style={styles.item}>
                 <Phone size={16} />
-
                 Contato:
-                {" "}
-                {pacienteCompleto?.contato ||
-                  paciente.contato ||
-                  "-"}
+                {paciente.contato}
               </p>
 
               <p
@@ -183,19 +180,74 @@ export default function PacienteDetalhe() {
                 }}
               >
                 <MapPin size={16} />
-
                 Endereço:
-                {" "}
-                {pacienteCompleto?.endereco ||
-                  paciente.endereco ||
-                  "-"}
+                {paciente.endereco}
               </p>
+
+              {suspeitaPaciente && (
+                <p
+                  style={{
+                    ...styles.item,
+                    gridColumn: "span 2",
+                  }}
+                >
+                  Suspeita:
+                  {suspeitaPaciente}
+                </p>
+              )}
             </div>
           </div>
+
+          <button
+            type="button"
+            className="btn-cancelar"
+            style={styles.voltarPacientes}
+            onClick={() => navigate("/pacientes")}
+          >
+            <ChevronLeft size={16} />
+            Voltar para pacientes
+          </button>
         </div>
 
-        {/* CARDS */}
+        {/* MÓDULOS */}
         <div style={styles.grid}>
+          {/* ENCAMINHAMENTOS */}
+          <div
+            style={{
+              ...styles.box,
+              ...styles.regulacao,
+            }}
+          >
+            <div>
+              <h3 style={styles.titleBox}>
+                <ClipboardList size={18} />
+                Encaminhamentos
+              </h3>
+
+              <p style={styles.boxDesc}>
+                {regulacoes.length} encaminhamentos
+              </p>
+            </div>
+
+            <button
+              onClick={() =>
+                {
+                  localStorage.setItem(
+                    "pacienteAtual",
+                    JSON.stringify(paciente)
+                  );
+
+                  navigate("/verregulacao", {
+                    state: paciente,
+                  });
+                }
+              }
+              style={styles.btn}
+            >
+              Ver
+              <ChevronRight size={16} />
+            </button>
+          </div>
 
           {/* CONSULTAS */}
           <div
@@ -207,30 +259,29 @@ export default function PacienteDetalhe() {
             <div>
               <h3 style={styles.titleBox}>
                 <CalendarDays size={18} />
-                Tele-Consulta
+                Tele-consulta
               </h3>
 
               <p style={styles.boxDesc}>
-                Visualizar consultas médicas
+                {consultas.length} consultas cadastradas
               </p>
             </div>
 
             <button
               onClick={() => {
                 navigate("/verconsulta", {
-                  state: pacienteCompleto || paciente,
+                  state: paciente,
                 });
 
                 localStorage.setItem(
                   "pacienteAtual",
-                  JSON.stringify(
-                    pacienteCompleto || paciente
-                  )
+                  JSON.stringify(paciente)
                 );
               }}
               style={styles.btn}
             >
-              Ver →
+              Ver
+              <ChevronRight size={16} />
             </button>
           </div>
 
@@ -248,63 +299,27 @@ export default function PacienteDetalhe() {
               </h3>
 
               <p style={styles.boxDesc}>
-                Resultados e solicitações
+                {exames.length} exames cadastrados
               </p>
             </div>
 
             <button
-              onClick={() => {
-                navigate("/verexame", {
-                  state: pacienteCompleto || paciente,
-                });
+              onClick={() =>
+                {
+                  localStorage.setItem(
+                    "pacienteAtual",
+                    JSON.stringify(paciente)
+                  );
 
-                localStorage.setItem(
-                  "pacienteAtual",
-                  JSON.stringify(
-                    pacienteCompleto || paciente
-                  )
-                );
-              }}
+                  navigate("/verexame", {
+                    state: paciente,
+                  });
+                }
+              }
               style={styles.btn}
             >
-              Ver →
-            </button>
-          </div>
-
-          {/* REGULAÇÃO */}
-          <div
-            style={{
-              ...styles.box,
-              ...styles.regulacao,
-            }}
-          >
-            <div>
-              <h3 style={styles.titleBox}>
-                <ClipboardList size={18} />
-                Regulação
-              </h3>
-
-              <p style={styles.boxDesc}>
-                Encaminhamentos e solicitações
-              </p>
-            </div>
-
-            <button
-              onClick={() => {
-                navigate("/verregulacao", {
-                  state: pacienteCompleto || paciente,
-                });
-
-                localStorage.setItem(
-                  "pacienteAtual",
-                  JSON.stringify(
-                    pacienteCompleto || paciente
-                  )
-                );
-              }}
-              style={styles.btn}
-            >
-              Ver →
+              Ver
+              <ChevronRight size={16} />
             </button>
           </div>
 
@@ -318,30 +333,31 @@ export default function PacienteDetalhe() {
             <div>
               <h3 style={styles.titleBox}>
                 <Clock size={18} />
-                Diagnóstico
+                Diagnósticos
               </h3>
 
               <p style={styles.boxDesc}>
-                Histórico e registros médicos
+                {diagnosticos.length} diagnósticos
               </p>
             </div>
 
             <button
-              onClick={() => {
-                navigate("/criardiagnostico", {
-                  state: pacienteCompleto || paciente,
-                });
+              onClick={() =>
+                {
+                  localStorage.setItem(
+                    "pacienteAtual",
+                    JSON.stringify(paciente)
+                  );
 
-                localStorage.setItem(
-                  "pacienteAtual",
-                  JSON.stringify(
-                    pacienteCompleto || paciente
-                  )
-                );
-              }}
+                  navigate("/CriarDiagnostico", {
+                    state: paciente,
+                  });
+                }
+              }
               style={styles.btn}
             >
-              Acessar →
+              <Plus size={16} />
+              Adicionar
             </button>
           </div>
         </div>
@@ -370,37 +386,39 @@ const styles: any = {
   },
 
   title: {
-    fontSize: "28px",
-    fontWeight: 600,
     color: "#1f2937",
+    fontSize: "28px",
+    fontWeight: 700,
     marginBottom: "5px",
   },
 
   subtitle: {
     color: "#6b7280",
-    marginBottom: "20px",
   },
 
   card: {
     display: "flex",
-    alignItems: "center",
-    gap: "25px",
+    gap: "16px",
     background: "#fff",
     padding: "25px",
-    borderRadius: "10px",
-    border: "1px solid #e5e7eb",
-    marginBottom: "30px",
+    borderRadius: "16px",
+    border: "1px solid #bfdbfe",
+    borderLeft: "5px solid #0b4f6c",
+    marginBottom: "25px",
+    alignItems: "flex-start",
+    boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
   },
 
   avatarContainer: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    paddingTop: "23px",
   },
 
   avatar: {
-    width: "140px",
-    height: "140px",
+    width: "120px",
+    height: "120px",
     borderRadius: "50%",
     background: "#f3f4f6",
     border: "2px solid #e5e7eb",
@@ -410,21 +428,33 @@ const styles: any = {
   },
 
   avatarImg: {
-    width: "140px",
-    height: "140px",
+    width: "120px",
+    height: "120px",
     borderRadius: "50%",
     objectFit: "cover",
   },
 
   infoContainer: {
     flex: 1,
+    minWidth: 0,
+  },
+
+  pacienteLabel: {
+    display: "block",
+    marginBottom: "4px",
+    color: "#0b4f6c",
+    fontSize: "11px",
+    fontWeight: 900,
+    textTransform: "uppercase",
+    letterSpacing: 0,
   },
 
   nome: {
+    marginBottom: "14px",
     fontSize: "24px",
-    fontWeight: 700,
-    color: "#111827",
-    marginBottom: "18px",
+    lineHeight: 1.25,
+    fontWeight: 800,
+    color: "#0f172a",
   },
 
   infoGrid: {
@@ -437,27 +467,40 @@ const styles: any = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    background: "#f9fafb",
-    padding: "10px 12px",
-    borderRadius: "8px",
+    minHeight: "42px",
+    background: "#f1f5f9",
+    padding: "12px 14px",
+    borderRadius: "999px",
+    color: "#475569",
     fontSize: "14px",
-    color: "#374151",
+    fontWeight: 700,
+    lineHeight: 1.35,
+  },
+
+  voltarPacientes: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    flex: "0 0 auto",
+    marginTop: 0,
   },
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+    gridTemplateColumns:
+      "repeat(auto-fit, minmax(220px, 1fr))",
     gap: "20px",
   },
 
   box: {
     padding: "20px",
-    borderRadius: "12px",
-    minHeight: "160px",
+    borderRadius: "10px",
+    minHeight: "170px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+    border: "1px solid #e5e7eb",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
   },
 
   titleBox: {
@@ -466,25 +509,27 @@ const styles: any = {
     gap: "8px",
     fontSize: "18px",
     fontWeight: 700,
-    color: "#111827",
-    marginBottom: "10px",
+    color: "#1f2937",
   },
 
   boxDesc: {
     fontSize: "14px",
     color: "#4b5563",
-    lineHeight: "20px",
+    marginTop: "10px",
+    lineHeight: 1.5,
   },
 
   btn: {
-    alignSelf: "flex-start",
-    padding: "10px 18px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "7px",
+    padding: "10px",
     border: "none",
     background: "#fff",
     borderRadius: "8px",
     cursor: "pointer",
-    fontWeight: 700,
-    fontSize: "14px",
+    fontWeight: "bold",
     transition: "0.2s",
   },
 
@@ -504,7 +549,7 @@ const styles: any = {
   },
 
   historico: {
-    background: "#e5e7eb",
-    borderLeft: "5px solid #6b7280",
+    background: "#ede9fe",
+    borderLeft: "5px solid #7c3aed",
   },
 };

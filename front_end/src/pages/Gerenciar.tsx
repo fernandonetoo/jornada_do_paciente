@@ -12,10 +12,13 @@ import {
   MapPin,
   Cake,
   User,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
 } from "lucide-react";
 
 import BotaoVoltar from "../components/BotaoVoltar";
-import { PacienteAtualBanner, NenhumPacienteSelecionado } from "../components/shared/PacienteAtualBanner";
+import { NenhumPacienteSelecionado } from "../components/shared/PacienteAtualBanner";
 import { usePacienteAtual } from "../hooks/usePacienteAtual";
 
 export default function PacienteDetalhe() {
@@ -72,6 +75,13 @@ export default function PacienteDetalhe() {
     paciente?.foto ||
     "";
 
+  const suspeitaPaciente =
+    paciente.suspeita ||
+    paciente.queixaPrincipal ||
+    paciente.queixa ||
+    paciente.tipo ||
+    "";
+
   // CONSULTAS
   const consultas = JSON.parse(
     localStorage.getItem("consulta") || "[]"
@@ -82,7 +92,7 @@ export default function PacienteDetalhe() {
     localStorage.getItem("exames") || "[]"
   ).filter((e: any) => e.pacienteId === paciente.cpf);
 
-  // REGULAÇÕES
+  // ENCAMINHAMENTOS
   const regulacoes = JSON.parse(
     localStorage.getItem("regulacao") || "[]"
   ).filter((r: any) => r.pacienteId === paciente.cpf);
@@ -108,8 +118,6 @@ export default function PacienteDetalhe() {
           </p>
         </div>
 
-        <PacienteAtualBanner paciente={paciente} />
-
         {/* CARD PACIENTE */}
         <div style={styles.card}>
           {/* FOTO */}
@@ -132,6 +140,10 @@ export default function PacienteDetalhe() {
 
           {/* INFO */}
           <div style={styles.infoContainer}>
+            <span style={styles.pacienteLabel}>
+              Paciente selecionado
+            </span>
+
             <h2 style={styles.nome}>
               {paciente.nome}
             </h2>
@@ -171,12 +183,72 @@ export default function PacienteDetalhe() {
                 Endereço:
                 {paciente.endereco}
               </p>
+
+              {suspeitaPaciente && (
+                <p
+                  style={{
+                    ...styles.item,
+                    gridColumn: "span 2",
+                  }}
+                >
+                  Suspeita:
+                  {suspeitaPaciente}
+                </p>
+              )}
             </div>
           </div>
+
+          <button
+            type="button"
+            className="btn-cancelar"
+            style={styles.voltarPacientes}
+            onClick={() => navigate("/pacientes")}
+          >
+            <ChevronLeft size={16} />
+            Voltar para pacientes
+          </button>
         </div>
 
         {/* MÓDULOS */}
         <div style={styles.grid}>
+          {/* ENCAMINHAMENTOS */}
+          <div
+            style={{
+              ...styles.box,
+              ...styles.regulacao,
+            }}
+          >
+            <div>
+              <h3 style={styles.titleBox}>
+                <ClipboardList size={18} />
+                Encaminhamentos
+              </h3>
+
+              <p style={styles.boxDesc}>
+                {regulacoes.length} encaminhamentos
+              </p>
+            </div>
+
+            <button
+              onClick={() =>
+                {
+                  localStorage.setItem(
+                    "pacienteAtual",
+                    JSON.stringify(paciente)
+                  );
+
+                  navigate("/criarregulacao", {
+                    state: paciente,
+                  });
+                }
+              }
+              style={styles.btn}
+            >
+              <Plus size={16} />
+              Adicionar
+            </button>
+          </div>
+
           {/* CONSULTAS */}
           <div
             style={{
@@ -187,7 +259,7 @@ export default function PacienteDetalhe() {
             <div>
               <h3 style={styles.titleBox}>
                 <CalendarDays size={18} />
-                Tele-Consulta
+                Tele-consulta
               </h3>
 
               <p style={styles.boxDesc}>
@@ -208,7 +280,8 @@ export default function PacienteDetalhe() {
               }}
               style={styles.btn}
             >
-              + Adicionar
+              <Plus size={16} />
+              Adicionar
             </button>
           </div>
 
@@ -245,44 +318,8 @@ export default function PacienteDetalhe() {
               }
               style={styles.btn}
             >
-              + Adicionar
-            </button>
-          </div>
-
-          {/* REGULAÇÃO */}
-          <div
-            style={{
-              ...styles.box,
-              ...styles.regulacao,
-            }}
-          >
-            <div>
-              <h3 style={styles.titleBox}>
-                <ClipboardList size={18} />
-                Regulação
-              </h3>
-
-              <p style={styles.boxDesc}>
-                {regulacoes.length} regulações
-              </p>
-            </div>
-
-            <button
-              onClick={() =>
-                {
-                  localStorage.setItem(
-                    "pacienteAtual",
-                    JSON.stringify(paciente)
-                  );
-
-                  navigate("/criarregulacao", {
-                    state: paciente,
-                  });
-                }
-              }
-              style={styles.btn}
-            >
-              + Adicionar
+              <Plus size={16} />
+              Adicionar
             </button>
           </div>
 
@@ -319,7 +356,8 @@ export default function PacienteDetalhe() {
               }
               style={styles.btn}
             >
-              Ver →
+              Ver
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>
@@ -360,19 +398,22 @@ const styles: any = {
 
   card: {
     display: "flex",
-    gap: "25px",
+    gap: "16px",
     background: "#fff",
     padding: "25px",
-    borderRadius: "10px",
-    border: "1px solid #e5e7eb",
+    borderRadius: "16px",
+    border: "1px solid #bfdbfe",
+    borderLeft: "5px solid #0b4f6c",
     marginBottom: "25px",
-    alignItems: "center",
+    alignItems: "flex-start",
+    boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
   },
 
   avatarContainer: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    paddingTop: "23px",
   },
 
   avatar: {
@@ -395,13 +436,25 @@ const styles: any = {
 
   infoContainer: {
     flex: 1,
+    minWidth: 0,
+  },
+
+  pacienteLabel: {
+    display: "block",
+    marginBottom: "4px",
+    color: "#0b4f6c",
+    fontSize: "11px",
+    fontWeight: 900,
+    textTransform: "uppercase",
+    letterSpacing: 0,
   },
 
   nome: {
-    marginBottom: "15px",
+    marginBottom: "14px",
     fontSize: "24px",
-    fontWeight: 700,
-    color: "#111827",
+    lineHeight: 1.25,
+    fontWeight: 800,
+    color: "#0f172a",
   },
 
   infoGrid: {
@@ -414,11 +467,22 @@ const styles: any = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    background: "#f9fafb",
-    padding: "12px",
-    borderRadius: "8px",
-    color: "#374151",
+    minHeight: "42px",
+    background: "#f1f5f9",
+    padding: "12px 14px",
+    borderRadius: "999px",
+    color: "#475569",
     fontSize: "14px",
+    fontWeight: 700,
+    lineHeight: 1.35,
+  },
+
+  voltarPacientes: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    flex: "0 0 auto",
+    marginTop: 0,
   },
 
   grid: {
@@ -456,6 +520,10 @@ const styles: any = {
   },
 
   btn: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "7px",
     padding: "10px",
     border: "none",
     background: "#fff",

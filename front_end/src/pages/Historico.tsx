@@ -34,8 +34,9 @@ export default function Diagnosticos() {
   const diagnosticos = todos
     .filter(
       (d: any) =>
-        d.pacienteId === usuario?.cpf ||
-        d.pacienteCpf === usuario?.cpf
+        normalizarCpf(d.pacienteId) === normalizarCpf(usuario?.cpf) ||
+        normalizarCpf(d.pacienteCpf) === normalizarCpf(usuario?.cpf) ||
+        normalizarCpf(d.cpf) === normalizarCpf(usuario?.cpf)
     )
     .filter((d: any) =>
       d.titulo?.toLowerCase().includes(busca.toLowerCase())
@@ -217,4 +218,8 @@ function formatarData(data: string) {
   }
 
   return data;
+}
+
+function normalizarCpf(valor: unknown) {
+  return String(valor || "").replace(/\D/g, "");
 }

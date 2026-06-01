@@ -21,11 +21,24 @@
   background-size: cover;
 }
 
+.auth-page--plain::before {
+  background: #ffffff;
+}
+
 .auth-page::after {
   z-index: 1;
   background:
     linear-gradient(135deg, rgba(11, 79, 108, 0.86), rgba(7, 46, 63, 0.78)),
     rgba(11, 79, 108, 0.32);
+}
+
+.auth-page--plain::after {
+  background: #ffffff;
+}
+
+.auth-page--plain .auth-card {
+  border-color: #e2e8f0;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.12);
 }
 
 .auth-card {

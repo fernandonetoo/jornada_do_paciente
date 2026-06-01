@@ -1,6 +1,7 @@
 import { useState } from "react";
-import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+import logo from "../assets/logo2.jpeg";
 import { changePassword } from "../services/backend";
 import { useToast } from "../hooks/useToast";
 
@@ -8,6 +9,10 @@ type ApiError = {
   response?: {
     data?: {
       message?: string;
+      errors?: {
+        novaSenha?: string[];
+        senhaAtual?: string[];
+      };
     };
   };
 };
@@ -19,44 +24,68 @@ export default function AlterarSenha() {
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [mostrarSenhaAtual, setMostrarSenhaAtual] = useState(false);
+  const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false);
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState("");
+
+  function getUsuarioLogado() {
+    try {
+      return JSON.parse(localStorage.getItem("usuarioLogado") || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  function voltarParaPerfil() {
+    const usuarioLogado = getUsuarioLogado();
+
+    if (
+      usuarioLogado?.grupos?.includes("medico_ubs") ||
+      usuarioLogado?.grupos?.includes("medico_oncologista") ||
+      usuarioLogado?.grupos?.includes("admin")
+    ) {
+      navigate("/perfil1");
+      return;
+    }
+
+    navigate("/perfil");
+  }
 
   async function handleAlterarSenha() {
     if (salvando) return;
 
-    let usuarioLogado = null;
+    setErro("");
 
-    try {
-      usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "null");
-    } catch {
-      toast.error({
-        title: "Erro ao carregar dados",
-        description: "Faça login novamente para alterar sua senha.",
-      });
-      return;
-    }
-
+    const usuarioLogado = getUsuarioLogado();
     if (!usuarioLogado) {
+      const message = "Faca login novamente para alterar sua senha.";
+      setErro(message);
       toast.error({
-        title: "Acesso necessário",
-        description: "Você precisa estar logado para alterar a senha.",
+        title: "Acesso necessario",
+        description: message,
       });
       navigate("/");
       return;
     }
 
     if (!senhaAtual || !novaSenha || !confirmarSenha) {
+      const message = "Preencha todos os campos antes de salvar.";
+      setErro(message);
       toast.error({
         title: "Erro ao alterar senha",
-        description: "Preencha todos os campos antes de salvar.",
+        description: message,
       });
       return;
     }
 
     if (novaSenha !== confirmarSenha) {
+      const message = "A nova senha e a confirmacao nao coincidem.";
+      setErro(message);
       toast.error({
         title: "Erro ao alterar senha",
-        description: "A nova senha e a confirmação não coincidem.",
+        description: message,
       });
       return;
     }
@@ -73,24 +102,21 @@ export default function AlterarSenha() {
       setSenhaAtual("");
       setNovaSenha("");
       setConfirmarSenha("");
-
-      if (
-        usuarioLogado.grupos?.includes("medico_ubs") ||
-        usuarioLogado.grupos?.includes("medico_oncologista") ||
-        usuarioLogado.grupos?.includes("admin")
-      ) {
-        navigate("/perfil1");
-        return;
-      }
-
-      navigate("/perfil");
+      voltarParaPerfil();
     } catch (error: unknown) {
       const apiError = error as ApiError;
+      const fieldError =
+        apiError.response?.data?.errors?.senhaAtual?.[0] ||
+        apiError.response?.data?.errors?.novaSenha?.[0];
+      const message =
+        fieldError ||
+        apiError.response?.data?.message ||
+        "Nao foi possivel alterar a senha.";
+
+      setErro(message);
       toast.error({
         title: "Erro ao alterar senha",
-        description:
-          apiError.response?.data?.message ||
-          "Não foi possível alterar a senha.",
+        description: message,
       });
     } finally {
       setSalvando(false);
@@ -98,102 +124,124 @@ export default function AlterarSenha() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#f5f6f7",
-      }}
-    >
-      <Header />
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          paddingTop: "60px",
-        }}
-      >
-        <div
-          style={{
-            background: "#fff",
-            padding: "30px",
-            borderRadius: "10px",
-            width: "350px",
-            textAlign: "center",
-            boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-          }}
-        >
-          <h1 style={{ color: "#0b4f6c", marginBottom: "10px" }}>
-            Alterar Senha
+    <main className="auth-page auth-page--plain">
+      <section className="auth-card" aria-labelledby="change-password-title">
+        <header className="auth-header">
+          <img className="auth-logo" src={logo} alt="Jornada do Paciente" />
+          <h1 id="change-password-title" className="auth-title">
+            Alterar senha
           </h1>
-
-          <p style={{ fontSize: "14px", color: "#666", marginBottom: "20px" }}>
-            Para sua segurança, informe sua senha atual e defina uma nova senha.
+          <p className="auth-subtitle">
+            Informe sua senha atual e defina uma nova senha.
           </p>
+        </header>
 
-          <input
-            type="password"
+        {erro && <div className="auth-alert">{erro}</div>}
+
+        <div className="auth-form">
+          <PasswordField
+            label="Senha atual"
+            name="senhaAtual"
             placeholder="Digite sua senha atual"
             value={senhaAtual}
-            onChange={(e) => setSenhaAtual(e.target.value)}
-            style={inputStyle}
+            visible={mostrarSenhaAtual}
+            onToggleVisible={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
+            onChange={setSenhaAtual}
+            onEnter={handleAlterarSenha}
           />
 
-          <input
-            type="password"
+          <PasswordField
+            label="Nova senha"
+            name="novaSenha"
             placeholder="Digite a nova senha"
             value={novaSenha}
-            onChange={(e) => setNovaSenha(e.target.value)}
-            style={inputStyle}
+            visible={mostrarNovaSenha}
+            onToggleVisible={() => setMostrarNovaSenha(!mostrarNovaSenha)}
+            onChange={setNovaSenha}
+            onEnter={handleAlterarSenha}
           />
 
-          <input
-            type="password"
+          <PasswordField
+            label="Confirmar nova senha"
+            name="confirmarSenha"
             placeholder="Confirme a nova senha"
             value={confirmarSenha}
-            onChange={(e) => setConfirmarSenha(e.target.value)}
-            style={inputStyle}
+            visible={mostrarConfirmarSenha}
+            onToggleVisible={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
+            onChange={setConfirmarSenha}
+            onEnter={handleAlterarSenha}
           />
 
-          <button style={botaoPrincipal} disabled={salvando} onClick={handleAlterarSenha}>
+          <button
+            className="auth-submit"
+            type="button"
+            disabled={salvando}
+            onClick={handleAlterarSenha}
+          >
+            {salvando && <span className="auth-spinner" aria-hidden="true" />}
             {salvando ? "Salvando..." : "Salvar nova senha"}
           </button>
+        </div>
 
-          <button style={botaoSecundario} disabled={salvando} onClick={() => navigate("/perfil")}>
+        <p className="auth-footer">
+          <button
+            className="auth-link-button"
+            type="button"
+            disabled={salvando}
+            onClick={voltarParaPerfil}
+          >
             Cancelar
           </button>
-        </div>
-      </div>
-    </div>
+        </p>
+      </section>
+    </main>
   );
 }
 
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  marginBottom: "10px",
-  borderRadius: "5px",
-  border: "1px solid #ccc",
+type PasswordFieldProps = {
+  label: string;
+  name: string;
+  placeholder: string;
+  value: string;
+  visible: boolean;
+  onToggleVisible: () => void;
+  onChange: (value: string) => void;
+  onEnter: () => void;
 };
 
-const botaoPrincipal = {
-  width: "100%",
-  padding: "10px",
-  background: "#0b4f6c",
-  color: "#fff",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
-  marginTop: "10px",
-};
-
-const botaoSecundario = {
-  width: "100%",
-  padding: "10px",
-  marginTop: "10px",
-  background: "#eee",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
-};
+function PasswordField({
+  label,
+  name,
+  placeholder,
+  value,
+  visible,
+  onToggleVisible,
+  onChange,
+  onEnter,
+}: PasswordFieldProps) {
+  return (
+    <label className="auth-field">
+      <span className="auth-label">{label}</span>
+      <span className="auth-password">
+        <input
+          className="auth-input"
+          name={name}
+          type={visible ? "text" : "password"}
+          placeholder={placeholder}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          onKeyDown={(event) => event.key === "Enter" && onEnter()}
+        />
+        <button
+          className="auth-icon-button"
+          type="button"
+          onClick={onToggleVisible}
+          tabIndex={-1}
+          aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
+        >
+          {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+      </span>
+    </label>
+  );
+}

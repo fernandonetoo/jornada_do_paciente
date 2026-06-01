@@ -256,6 +256,26 @@ export default function Exames() {
     });
   }
 
+  function abrirResultado(exame: any) {
+    setExameAtual(exame);
+    setResultadoTexto(exame.resultado || exame.status || "");
+    setDataResultado(
+      exame.dataRealizacao && exame.dataRealizacao !== "-"
+        ? exame.dataRealizacao
+        : ""
+    );
+    setObservacaoResultado(exame.observacaoResultado || "");
+    setMostrarResultado(true);
+  }
+
+  function fecharResultado() {
+    setMostrarResultado(false);
+    setExameAtual(null);
+    setResultadoTexto("");
+    setDataResultado("");
+    setObservacaoResultado("");
+  }
+
   async function salvarResultado() {
     if (salvandoResultado) return;
 
@@ -283,7 +303,7 @@ export default function Exames() {
           return {
             ...e,
 
-            status: "Concluído",
+            status: resultadoTexto,
 
             dataRealizacao:
               dataResultado,
@@ -317,13 +337,7 @@ export default function Exames() {
       setSalvandoResultado(false);
     }
 
-    setMostrarResultado(false);
-
-    setResultadoTexto("");
-
-    setDataResultado("");
-
-    setObservacaoResultado("");
+    fecharResultado();
 
     setDataVersion((version) => version + 1);
     toast.success({
@@ -461,7 +475,12 @@ export default function Exames() {
             <tbody>
               {exames.length === 0 ? (
                 <tr>
-                  <td colSpan={6}>
+                  <td
+                    colSpan={6}
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
                     Nenhum exame cadastrado
                   </td>
                 </tr>
@@ -516,15 +535,9 @@ export default function Exames() {
 
                         <button
                           className="btn-cancelar"
-                          onClick={() => {
-                            setExameAtual(
-                              e
-                            );
-
-                            setMostrarResultado(
-                              true
-                            );
-                          }}
+                          onClick={() =>
+                            abrirResultado(e)
+                          }
                         >
                           Resultado
                         </button>
@@ -643,8 +656,8 @@ export default function Exames() {
                       Em andamento
                     </option>
 
-                    <option value="Concluído">
-                      Concluído
+                    <option value="Concluido">
+                      Concluido
                     </option>
 
                     <option value="Cancelado">
@@ -771,17 +784,14 @@ export default function Exames() {
                     <option value="">
                       Selecione o resultado
                     </option>
-                    <option value="Normal">
-                      Normal
+                    <option value="Agendado">
+                      Agendado
                     </option>
-                    <option value="Alterado">
-                      Alterado
+                    <option value="Cancelado">
+                      Cancelado
                     </option>
-                    <option value="Inconclusivo">
-                      Inconclusivo
-                    </option>
-                    <option value="Aguardando laudo">
-                      Aguardando laudo
+                    <option value="Concluido">
+                      Concluido
                     </option>
                   </select>
                 </div>
@@ -829,11 +839,7 @@ export default function Exames() {
                 <button
                   className="btn-cancelar btn-cancelar-modal"
                   disabled={salvandoResultado}
-                  onClick={() =>
-                    setMostrarResultado(
-                      false
-                    )
-                  }
+                  onClick={fecharResultado}
                 >
                   Cancelar
                 </button>
@@ -874,7 +880,10 @@ function getStatusStyle(
     };
   }
 
-  if (status === "Concluído") {
+  if (
+    status === "Concluído" ||
+    status === "Concluido"
+  ) {
     return {
       background: "#d1fae5",
       color: "#059669",

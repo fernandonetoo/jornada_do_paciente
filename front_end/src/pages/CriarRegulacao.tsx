@@ -1,14 +1,13 @@
 import Header from "../components/Header1";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
+import { Forward, Plus, Search } from "lucide-react";
 import BotaoVoltar from "../components/BotaoVoltar";
 import "../pages/forms-medicos.css";
 import { saveCollection } from "../services/backend";
 import { useToast } from "../hooks/useToast";
 import { useConfirm } from "../components/shared/useConfirm";
-import StatusDateFilters from "../components/shared/StatusDateFilters";
-import SearchCard from "../components/shared/SearchCard";
-import { matchesDateRange, matchesStatus } from "../lib/filters";
+import { matchesStatus } from "../lib/filters";
 import { PacienteAtualBanner, NenhumPacienteSelecionado } from "../components/shared/PacienteAtualBanner";
 import { usePacienteAtual } from "../hooks/usePacienteAtual";
 
@@ -53,8 +52,6 @@ export default function Regulacao() {
 
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
-  const [dataInicial, setDataInicial] = useState("");
-  const [dataFinal, setDataFinal] = useState("");
 
   const [medicoSelecionado, setMedicoSelecionado] =
     useState<any>(null);
@@ -73,8 +70,8 @@ export default function Regulacao() {
         <div className="page-medica-container">
           <div className="page-topo">
             <div className="page-titulo">
-              <h1>Regulação</h1>
-              <p>Selecione um paciente para gerenciar regulações.</p>
+              <h1>Encaminhamentos</h1>
+              <p>Selecione um paciente para gerenciar encaminhamentos.</p>
             </div>
           </div>
 
@@ -110,9 +107,7 @@ export default function Regulacao() {
         .includes(busca.toLowerCase())
     )
     .filter((r: any) => matchesStatus(r.status, filtroStatus))
-    .filter((r: any) =>
-      matchesDateRange(r.dataSolicitacao, dataInicial, dataFinal)
-    );
+    ;
 
   function limparFormulario() {
     setTipo("");
@@ -135,7 +130,7 @@ export default function Regulacao() {
     ) {
       toast.error({
         title: "Erro ao salvar",
-        description: "Preencha todos os campos obrigatórios da regulação.",
+        description: "Preencha todos os campos obrigatórios do encaminhamento.",
       });
       return;
     }
@@ -189,7 +184,7 @@ export default function Regulacao() {
     } catch {
       toast.error({
         title: "Erro ao salvar",
-        description: "Não foi possível salvar a regulação no backend.",
+        description: "Não foi possível salvar o encaminhamento no backend.",
       });
       return;
     } finally {
@@ -201,8 +196,8 @@ export default function Regulacao() {
     setMostrarForm(false);
     setDataVersion((version) => version + 1);
     toast.success({
-      title: editandoIndex !== null ? "Regulação editada" : "Regulação criada",
-      description: "A solicitação de regulação foi salva com sucesso.",
+      title: editandoIndex !== null ? "Encaminhamento editado" : "Encaminhamento criado",
+      description: "O encaminhamento foi salvo com sucesso.",
     });
   }
 
@@ -256,7 +251,7 @@ export default function Regulacao() {
     if (excluindoIndex !== null) return;
 
     const confirmar = await confirm(
-      "Deseja excluir essa regulação?"
+      "Deseja excluir esse encaminhamento?"
     );
 
     if (!confirmar) return;
@@ -277,7 +272,7 @@ export default function Regulacao() {
     } catch {
       toast.error({
         title: "Erro ao excluir",
-        description: "Não foi possível excluir a regulação no backend.",
+        description: "Não foi possível excluir o encaminhamento no backend.",
       });
       return;
     } finally {
@@ -286,8 +281,8 @@ export default function Regulacao() {
 
     setDataVersion((version) => version + 1);
     toast.success({
-      title: "Regulação excluída",
-      description: "A solicitação de regulação foi removida com sucesso.",
+      title: "Encaminhamento excluído",
+      description: "O encaminhamento foi removido com sucesso.",
     });
   }
 
@@ -301,81 +296,120 @@ export default function Regulacao() {
         <div className="page-topo">
 
           <div className="page-titulo">
-            <h1>Regulação</h1>
+            <h1>Encaminhamentos</h1>
 
             <p>
-              Gerencie solicitações
-              de regulação do
+              Gerencie encaminhamentos
+              do
               paciente
             </p>
           </div>
 
-          <div className="page-badge">
-            <strong>
-              {regulacoes.length}
-            </strong>
+          <div className="page-badge page-badge-exames page-badge-encaminhamentos">
+            <div className="page-badge-icon">
+              <Forward size={22} />
+            </div>
 
-            <span>
-              Regulações cadastradas
-            </span>
+            <div>
+              <strong>
+                {regulacoes.length}
+              </strong>
+
+              <span>
+                Encaminhamentos Cadastrados
+              </span>
+            </div>
           </div>
         </div>
 
         <PacienteAtualBanner paciente={paciente} />
 
         {/* BUSCA */}
-        <SearchCard
-          label="Buscar regulação"
-          placeholder="Buscar por tipo..."
-          value={busca}
-          onChange={setBusca}
-        />
+        <div className="form-card">
+          <div className="form-grid form-grid-busca-exame">
+            <div className="form-group">
+              <label className="form-label">
+                Buscar encaminhamento
+              </label>
 
-        {/* BOTÃO */}
-        <StatusDateFilters
-          statusValue={filtroStatus}
-          statusOptions={["Em analise", "Aprovado", "Negado", "Pendente"]}
-          dateStart={dataInicial}
-          dateEnd={dataFinal}
-          onStatusChange={setFiltroStatus}
-          onDateStartChange={setDataInicial}
-          onDateEndChange={setDataFinal}
-          onClear={() => {
-            setFiltroStatus("");
-            setDataInicial("");
-            setDataFinal("");
-          }}
-        />
+              <div className="search-card-input">
+                <Search size={17} aria-hidden="true" />
+                <input
+                  className="form-input"
+                  placeholder="Buscar por tipo..."
+                  value={busca}
+                  onChange={(e) =>
+                    setBusca(e.target.value)
+                  }
+                />
+              </div>
+            </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent:
-              "flex-end",
-            marginBottom: 20,
-          }}
-        >
-          <button
-            className="btn-salvar"
-            onClick={() =>
-              setMostrarForm(true)
-            }
-          >
-            + Nova Regulação
-          </button>
+            <div className="form-group">
+              <label className="form-label">
+                Status
+              </label>
+
+              <select
+                className="form-input select-status-exame"
+                value={filtroStatus}
+                onChange={(e) =>
+                  setFiltroStatus(e.target.value)
+                }
+              >
+                <option value="">
+                  Todos os status
+                </option>
+                <option value="Em analise">
+                  Em analise
+                </option>
+                <option value="Aprovado">
+                  Aprovado
+                </option>
+                <option value="Negado">
+                  Negado
+                </option>
+                <option value="Pendente">
+                  Pendente
+                </option>
+              </select>
+            </div>
+
+            <div className="form-group form-group-botao-exame">
+              <button
+                className="btn-salvar btn-novo-exame"
+                onClick={() =>
+                  setMostrarForm(true)
+                }
+              >
+                <Plus size={16} />
+                Novo Encaminhamento
+              </button>
+            </div>
+          </div>
         </div>
 
+        {/* BOTAO */}
         {/* TABELA */}
-        <div className="form-card">
+        <div className="tabela-exames-wrapper animate-fade-in">
+          <div className="tabela-exames-header tabela-encaminhamentos-header">
+            <div className="page-badge-icon tabela-exames-header-icon">
+              <Forward size={16} />
+            </div>
 
-          <table className="tabela-moderna">
+            <span>
+              Lista de encaminhamentos
+            </span>
+          </div>
+
+          <table className="tabela-exames-atendimento">
 
             <thead>
               <tr>
                 <th>Tipo</th>
                 <th>Data</th>
                 <th>Hora</th>
-                <th>Médico</th>
+                <th>Medico</th>
                 <th>Status</th>
                 <th></th>
               </tr>
@@ -386,8 +420,13 @@ export default function Regulacao() {
               {regulacoes.length ===
               0 ? (
                 <tr>
-                  <td colSpan={6}>
-                    Nenhuma regulação cadastrada
+                  <td
+                    colSpan={6}
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    Nenhum encaminhamento cadastrado
                   </td>
                 </tr>
               ) : (
@@ -431,6 +470,9 @@ export default function Regulacao() {
                             display:
                               "flex",
                             gap: 10,
+                            justifyContent:
+                              "flex-end",
+                            flexWrap: "wrap",
                           }}
                         >
 
@@ -483,13 +525,13 @@ export default function Regulacao() {
                   <h2>
                     {editandoIndex !==
                     null
-                      ? "Editar Regulação"
-                      : "Nova Regulação"}
+                      ? "Editar Encaminhamento"
+                      : "Novo Encaminhamento"}
                   </h2>
 
                   <p>
                     Preencha os dados
-                    da regulação
+                    do encaminhamento
                   </p>
                 </div>
 
@@ -663,7 +705,7 @@ export default function Regulacao() {
               <div className="form-actions">
 
                 <button
-                  className="btn-cancelar"
+                  className="btn-cancelar btn-cancelar-modal"
                   disabled={salvando}
                   onClick={() => {
 
@@ -678,7 +720,7 @@ export default function Regulacao() {
                 </button>
 
                 <button
-                  className="btn-salvar"
+                  className="btn-salvar btn-salvar-exame"
                   disabled={salvando}
                   onClick={
                     salvarRegulacao
@@ -687,7 +729,7 @@ export default function Regulacao() {
                   {salvando ? "Salvando..." : editandoIndex !==
                   null
                     ? "Salvar alterações"
-                    : "Salvar regulação"}
+                    : "Salvar encaminhamento"}
                 </button>
 
               </div>

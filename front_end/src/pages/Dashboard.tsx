@@ -53,9 +53,13 @@ export default function Dashboard() {
   // 🔥 PACIENTE PELO CPF
   const paciente = pacientes.find(
     (p: any) =>
-      String(p.cpf).replace(/\D/g, "") ===
-      String(usuario?.cpf).replace(/\D/g, "")
+      normalizarCpf(p.cpf) ===
+      normalizarCpf(usuario?.cpf)
   );
+
+  const cpfPacienteAtual =
+    normalizarCpf(paciente?.cpf) ||
+    normalizarCpf(usuario?.cpf);
 
   // 🔥 CARTÃO SUS
   const cartaoSus =
@@ -66,19 +70,19 @@ export default function Dashboard() {
 
   // 🔥 FILTRA DADOS DO PACIENTE
   const consultasPaciente = consultas.filter(
-    (c: any) => c.pacienteId === paciente?.cpf
+    (c: any) => normalizarCpf(c.pacienteId) === cpfPacienteAtual
   );
 
   const examesPaciente = exames.filter(
-    (e: any) => e.pacienteId === paciente?.cpf
+    (e: any) => normalizarCpf(e.pacienteId) === cpfPacienteAtual
   );
 
   const regulacoesPaciente = regulacoes.filter(
-    (r: any) => r.pacienteId === paciente?.cpf
+    (r: any) => normalizarCpf(r.pacienteId) === cpfPacienteAtual
   );
 
   const diagnosticosPaciente = diagnosticos.filter(
-    (d: any) => d.pacienteId === paciente?.cpf
+    (d: any) => normalizarCpf(d.pacienteId) === cpfPacienteAtual
   );
 
   return (
@@ -315,3 +319,7 @@ const styles: any = {
     transform: "scale(1.12)",
   },
 };
+
+function normalizarCpf(valor: unknown) {
+  return String(valor || "").replace(/\D/g, "");
+}

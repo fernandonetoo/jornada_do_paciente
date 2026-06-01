@@ -75,7 +75,9 @@ export default function Exames() {
       key: "acoes",
       header: "Ações",
       render: (exame) =>
-        exame.status === "Concluído" || exame.status === "Realizado" ? (
+        exame.status === "Concluído" ||
+        exame.status === "Concluido" ||
+        exame.status === "Realizado" ? (
           <button className="btn-salvar compact-action">Ver resultado</button>
         ) : (
           <button className="btn-ver-detalhes">

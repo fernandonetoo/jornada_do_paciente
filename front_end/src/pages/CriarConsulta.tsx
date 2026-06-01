@@ -360,7 +360,12 @@ export default function Consultas() {
             <tbody>
               {consultas.length === 0 ? (
                 <tr>
-                  <td colSpan={5}>
+                  <td
+                    colSpan={5}
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
                     Nenhuma consulta
                     cadastrada
                   </td>
@@ -445,10 +450,6 @@ export default function Consultas() {
           <div className="overlay">
             <div className="modal">
               <div className="form-card-header">
-                <div className="form-icon">
-                  
-                </div>
-
                 <div>
                   <h2>
                     {editandoIndex !==
@@ -550,7 +551,7 @@ export default function Consultas() {
 
                 <div className="form-group">
                   <label className="form-label">
-                    Unidade
+                    Unidade básica de saúde
                   </label>
 
                   <input

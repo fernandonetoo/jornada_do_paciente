@@ -14,6 +14,8 @@ export default function Atendimentos() {
   const [abrirModal, setAbrirModal] = useState(false);
   const [erros, setErros] = useState<Record<string, string>>({});
   const [salvando, setSalvando] = useState(false);
+  const [excluindoId, setExcluindoId] = useState<number | null>(null);
+  const [atendimentoParaExcluir, setAtendimentoParaExcluir] = useState<any>(null);
 
   const [nome, setNome] = useState("");
   const [idade, setIdade] = useState("");
@@ -119,6 +121,43 @@ export default function Atendimentos() {
     const usuarios = JSON.parse(localStorage.getItem("usuarios") || "[]");
     const u = usuarios.find((u: any) => u.cpf === cpf);
     return u?.fotoPerfil || u?.foto || "";
+  }
+
+  async function confirmarExclusaoAtendimento() {
+    const paciente = atendimentoParaExcluir;
+    if (!paciente) return;
+    if (excluindoId !== null) return;
+
+    const id = paciente.id ?? null;
+    const atualizados = pacientes.filter((p) =>
+      id !== null ? p.id !== id : p.cpf !== paciente.cpf
+    );
+
+    setExcluindoId(id);
+
+    try {
+      await saveCollection("pacientes", atualizados);
+      setPacientes(atualizados);
+
+      const pacienteAtual = JSON.parse(localStorage.getItem("pacienteAtual") || "null");
+      if (pacienteAtual?.cpf === paciente.cpf) {
+        localStorage.removeItem("pacienteAtual");
+      }
+
+      setAtendimentoParaExcluir(null);
+
+      toast.success({
+        title: "Atendimento excluído",
+        description: "O atendimento foi removido com sucesso.",
+      });
+    } catch {
+      toast.error({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o atendimento no backend.",
+      });
+    } finally {
+      setExcluindoId(null);
+    }
   }
 
   return (
@@ -232,13 +271,23 @@ export default function Atendimentos() {
                       </td>
                       <td style={s.td}>{formatarData(p.criadoEm)}</td>
                       <td style={{ ...s.td, textAlign: "center" }}>
-                        <button
-                          style={s.btnDetalhes}
-                          onClick={() => navigate("/gerenciar", { state: p })}
-                        >
-                          Ver detalhes
-                          <ChevronRight size={14} />
-                        </button>
+                        <div style={s.actions}>
+                          <button
+                            style={s.btnExcluir}
+                            disabled={excluindoId !== null}
+                            onClick={() => setAtendimentoParaExcluir(p)}
+                          >
+                            {excluindoId === p.id ? "Excluindo..." : "Excluir"}
+                          </button>
+
+                          <button
+                            style={s.btnDetalhes}
+                            onClick={() => navigate("/gerenciar", { state: p })}
+                          >
+                            Ver detalhes
+                            <ChevronRight size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -249,6 +298,49 @@ export default function Atendimentos() {
         </div>
         <BotaoVoltar/>
       </div>
+
+      {atendimentoParaExcluir && (
+        <div
+          style={s.overlay}
+          onClick={(e) =>
+            e.target === e.currentTarget &&
+            excluindoId === null &&
+            setAtendimentoParaExcluir(null)
+          }
+        >
+          <div style={s.confirmModal} className="animate-scale-in">
+            <div style={s.confirmIcon}>
+              <X size={24} />
+            </div>
+
+            <h3 style={s.confirmTitle}>
+              Deseja excluir esse atendimento?
+            </h3>
+
+            <p style={s.confirmText}>
+              Essa ação remove o atendimento da lista e não pode ser desfeita.
+            </p>
+
+            <div style={s.confirmActions}>
+              <button
+                style={s.confirmCancel}
+                disabled={excluindoId !== null}
+                onClick={() => setAtendimentoParaExcluir(null)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                style={s.confirmYes}
+                disabled={excluindoId !== null}
+                onClick={confirmarExclusaoAtendimento}
+              >
+                {excluindoId !== null ? "Excluindo..." : "Sim"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODAL NOVO ATENDIMENTO */}
       {abrirModal && (
@@ -482,6 +574,14 @@ const s: any = {
     padding: "2px 8px", fontSize: "12px", fontWeight: 500,
   },
 
+  actions: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+    flexWrap: "wrap",
+  },
+
   btnDetalhes: {
     display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px",
     background: "#ffffff", border: "1px solid #e2e8f0", color: "#334155",
@@ -491,6 +591,14 @@ const s: any = {
     whiteSpace: "nowrap", transition: "background 0.15s, border-color 0.15s, color 0.15s",
   },
 
+  btnExcluir: {
+    display: "inline-flex", alignItems: "center", justifyContent: "center",
+    background: "#fee2e2", border: "1px solid #fecaca", color: "#dc2626",
+    padding: "8px 16px", borderRadius: "12px", cursor: "pointer",
+    minHeight: "34px", fontSize: "12px", fontWeight: 700, lineHeight: 1,
+    fontFamily: "inherit", whiteSpace: "nowrap",
+  },
+
   empty: { textAlign: "center", padding: "56px 20px", color: "#9ca3af", fontSize: "15px" },
 
   // Modal
@@ -498,6 +606,62 @@ const s: any = {
     position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
     background: "rgba(0,0,0,0.45)", display: "flex",
     alignItems: "center", justifyContent: "center", zIndex: 1000,
+  },
+
+  confirmModal: {
+    width: "min(420px, calc(100vw - 32px))",
+    background: "#ffffff",
+    borderRadius: "16px",
+    padding: "26px",
+    boxShadow: "0 24px 70px rgba(15, 23, 42, 0.28)",
+    textAlign: "center",
+    border: "1px solid #fee2e2",
+  },
+
+  confirmIcon: {
+    width: "52px",
+    height: "52px",
+    borderRadius: "999px",
+    background: "#fee2e2",
+    color: "#dc2626",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "14px",
+  },
+
+  confirmTitle: {
+    margin: "0 0 8px",
+    color: "#111827",
+    fontSize: "19px",
+    lineHeight: 1.25,
+    fontWeight: 800,
+  },
+
+  confirmText: {
+    margin: 0,
+    color: "#64748b",
+    fontSize: "14px",
+    lineHeight: 1.5,
+  },
+
+  confirmActions: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "10px",
+    marginTop: "22px",
+  },
+
+  confirmCancel: {
+    background: "#dc2626", border: "1px solid #dc2626", color: "#ffffff",
+    padding: "10px 20px", borderRadius: "10px", cursor: "pointer",
+    fontSize: "14px", fontWeight: 800,
+  },
+
+  confirmYes: {
+    background: "#16a34a", border: "1px solid #16a34a", color: "#ffffff",
+    padding: "10px 24px", borderRadius: "10px", cursor: "pointer",
+    fontSize: "14px", fontWeight: 800,
   },
 
   modal: {

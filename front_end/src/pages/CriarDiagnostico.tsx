@@ -2,13 +2,12 @@ import Header from "../components/Header1";
 import BotaoVoltar from "../components/BotaoVoltar";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
+import { Plus, Search, Stethoscope } from "lucide-react";
 import "../pages/forms-medicos.css";
 import { saveCollection } from "../services/backend";
 import { useToast } from "../hooks/useToast";
 import { useConfirm } from "../components/shared/useConfirm";
-import StatusDateFilters from "../components/shared/StatusDateFilters";
-import SearchCard from "../components/shared/SearchCard";
-import { matchesDateRange, matchesStatus } from "../lib/filters";
+import { matchesStatus } from "../lib/filters";
 import { PacienteAtualBanner, NenhumPacienteSelecionado } from "../components/shared/PacienteAtualBanner";
 import { usePacienteAtual } from "../hooks/usePacienteAtual";
 
@@ -31,8 +30,6 @@ export default function Diagnostico() {
   const [busca, setBusca] =
     useState("");
   const [filtroStatus, setFiltroStatus] = useState("");
-  const [dataInicial, setDataInicial] = useState("");
-  const [dataFinal, setDataFinal] = useState("");
 
   const [titulo, setTitulo] =
     useState("");
@@ -108,9 +105,7 @@ export default function Diagnostico() {
         )
     )
     .filter((d: any) => matchesStatus(d.status, filtroStatus))
-    .filter((d: any) =>
-      matchesDateRange(d.data, dataInicial, dataFinal)
-    );
+    ;
 
   function limparFormulario() {
     setTitulo("");
@@ -292,71 +287,111 @@ export default function Diagnostico() {
             </p>
           </div>
 
-          <div className="page-badge">
-            <strong>
-              {diagnosticos.length}
-            </strong>
+          <div className="page-badge page-badge-exames">
+            <div className="page-badge-icon">
+              <Stethoscope size={22} />
+            </div>
 
-            <span>
-              Diagnósticos cadastrados
-            </span>
+            <div>
+              <strong>
+                {diagnosticos.length}
+              </strong>
+
+              <span>
+                Diagnosticos cadastrados
+              </span>
+            </div>
           </div>
         </div>
 
         <PacienteAtualBanner paciente={paciente} />
 
         {/* BUSCA */}
-        <SearchCard
-          label="Buscar diagnóstico"
-          placeholder="Buscar por título..."
-          value={busca}
-          onChange={setBusca}
-        />
+        <div className="form-card">
+          <div className="form-grid form-grid-busca-exame">
+            <div className="form-group">
+              <label className="form-label">
+                Buscar diagnostico
+              </label>
 
-        {/* BOTÃO */}
-        <StatusDateFilters
-          statusValue={filtroStatus}
-          statusOptions={["Ativo", "Em tratamento", "Concluido", "Cancelado"]}
-          dateStart={dataInicial}
-          dateEnd={dataFinal}
-          onStatusChange={setFiltroStatus}
-          onDateStartChange={setDataInicial}
-          onDateEndChange={setDataFinal}
-          onClear={() => {
-            setFiltroStatus("");
-            setDataInicial("");
-            setDataFinal("");
-          }}
-        />
+              <div className="search-card-input">
+                <Search size={17} aria-hidden="true" />
+                <input
+                  className="form-input"
+                  placeholder="Buscar por titulo..."
+                  value={busca}
+                  onChange={(e) =>
+                    setBusca(e.target.value)
+                  }
+                />
+              </div>
+            </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent:
-              "flex-end",
-            marginBottom: 20,
-          }}
-        >
-          <button
-            className="btn-salvar"
-            onClick={() =>
-              setMostrarModal(true)
-            }
-          >
-            Novo Diagnóstico
-          </button>
+            <div className="form-group">
+              <label className="form-label">
+                Status
+              </label>
+
+              <select
+                className="form-input select-status-exame"
+                value={filtroStatus}
+                onChange={(e) =>
+                  setFiltroStatus(e.target.value)
+                }
+              >
+                <option value="">
+                  Todos os status
+                </option>
+                <option value="Ativo">
+                  Ativo
+                </option>
+                <option value="Em tratamento">
+                  Em tratamento
+                </option>
+                <option value="Concluido">
+                  Concluido
+                </option>
+                <option value="Cancelado">
+                  Cancelado
+                </option>
+              </select>
+            </div>
+
+            <div className="form-group form-group-botao-exame">
+              <button
+                className="btn-salvar btn-novo-exame"
+                onClick={() =>
+                  setMostrarModal(true)
+                }
+              >
+                <Plus size={16} />
+                Novo Diagnostico
+              </button>
+            </div>
+          </div>
         </div>
 
+        {/* BOTAO */}
         {/* TABELA */}
-        <div className="form-card">
-          <table className="tabela-moderna">
+        <div className="tabela-exames-wrapper animate-fade-in">
+          <div className="tabela-exames-header">
+            <div className="page-badge-icon tabela-exames-header-icon">
+              <Stethoscope size={16} />
+            </div>
+
+            <span>
+              Lista de diagnosticos
+            </span>
+          </div>
+
+          <table className="tabela-exames-atendimento">
             <thead>
               <tr>
-                <th>Título</th>
+                <th>Titulo</th>
                 <th>Data</th>
                 <th>Status</th>
-                <th>Médico</th>
-                <th>Descrição</th>
+                <th>Medico</th>
+                <th>Descricao</th>
                 <th></th>
               </tr>
             </thead>
@@ -365,8 +400,13 @@ export default function Diagnostico() {
               {diagnosticos.length ===
               0 ? (
                 <tr>
-                  <td colSpan={6}>
-                    Nenhum diagnóstico encontrado
+                  <td
+                    colSpan={6}
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    Nenhum diagnostico encontrado
                   </td>
                 </tr>
               ) : (
@@ -412,6 +452,9 @@ export default function Diagnostico() {
                             display:
                               "flex",
                             gap: 10,
+                            justifyContent:
+                              "flex-end",
+                            flexWrap: "wrap",
                           }}
                         >
                           <button
@@ -426,7 +469,7 @@ export default function Diagnostico() {
                           </button>
 
                           <button
-                            className="btn-cancelar"
+                            className="btn-excluir"
                             disabled={excluindoIndex !== null}
                             onClick={() =>
                               excluirDiagnostico(
@@ -592,7 +635,7 @@ export default function Diagnostico() {
               <div className="form-actions">
 
                 <button
-                  className="btn-cancelar"
+                  className="btn-cancelar btn-cancelar-modal"
                   disabled={salvando}
                   onClick={() => {
                     limparFormulario();
@@ -606,7 +649,7 @@ export default function Diagnostico() {
                 </button>
 
                 <button
-                  className="btn-salvar"
+                  className="btn-salvar btn-salvar-exame"
                   disabled={salvando}
                   onClick={
                     salvarDiagnostico
@@ -657,7 +700,10 @@ function getStatusStyle(
     };
   }
 
-  if (status === "Concluído") {
+  if (
+    status === "Concluído" ||
+    status === "Concluido"
+  ) {
     return {
       background: "#d1fae5",
       color: "#059669",
